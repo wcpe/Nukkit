@@ -53,7 +53,7 @@ public class GlobalBlockPalette {
                 int legacyId = legacyState.getInt("id") << 6 | legacyState.getShort("val");
                 legacyToRuntimeId.put(legacyId, runtimeId);
             }
-            state.remove("meta"); // No point in sending this since the client doesn't use it.
+            state.remove("LegacyStates"); // No point in sending this since the client doesn't use it.
         }
 
         try {

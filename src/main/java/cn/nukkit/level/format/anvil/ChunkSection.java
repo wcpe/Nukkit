@@ -4,6 +4,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.level.format.anvil.util.BlockStorage;
 import cn.nukkit.level.format.anvil.util.NibbleArray;
 import cn.nukkit.level.format.generic.EmptyChunkSection;
+import cn.nukkit.level.util.BitArrayVersion;
 import cn.nukkit.level.util.PalettedBlockStorage;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.*;
@@ -17,7 +18,7 @@ import java.util.Arrays;
  */
 public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
 
-    private static final PalettedBlockStorage EMPTY_STORAGE = new PalettedBlockStorage();
+    private static final PalettedBlockStorage EMPTY_STORAGE = new PalettedBlockStorage(BitArrayVersion.V1);
 
     private final int y;
 
@@ -323,6 +324,16 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
             stream.putByte((byte) 2);
             this.storage.writeTo(stream);
             EMPTY_STORAGE.writeTo(stream);
+        }
+    }
+
+    @Override
+    public void writeToLegacy(BinaryStream stream) {
+        stream.putByte((byte) 0); // subChunkVersion
+
+        synchronized (this.storage) {
+            stream.put(this.storage.getBlockIds());
+            stream.put(this.storage.getBlockData());
         }
     }
 

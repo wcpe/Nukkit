@@ -48,9 +48,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.nukkitx</groupId>
-            <artifactId>fastutil-lite</artifactId>
-            <version>8.1.1</version>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>8.4.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

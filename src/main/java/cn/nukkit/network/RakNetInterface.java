@@ -66,14 +66,13 @@ public class RakNetInterface implements RakNetServerListener, AdvancedSourceInte
         while (iterator.hasNext()) {
             NukkitSessionListener listener = iterator.next();
             Player player = listener.player;
-            if (listener.disconnectReason != null) {
-                player.close(player.getLeaveMessage(), listener.disconnectReason, false);
-                iterator.remove();
-                continue;
-            }
             DataPacket packet;
             while ((packet = listener.packets.poll()) != null) {
                 listener.player.handleDataPacket(packet);
+            }
+            if (listener.disconnectReason != null) {
+                player.close(player.getLeaveMessage(), listener.disconnectReason, false);
+                iterator.remove();
             }
         }
         return true;

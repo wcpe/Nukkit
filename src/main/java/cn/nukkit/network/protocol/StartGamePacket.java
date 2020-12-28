@@ -20,7 +20,7 @@ import java.util.Collection;
  * Created on 15-10-13.
  */
 @Log4j2
-@ToString(exclude = {"blockPalette"})
+@ToString
 public class StartGamePacket extends DataPacket {
 
     public static final byte NETWORK_ID = ProtocolInfo.START_GAME_PACKET;
@@ -132,7 +132,7 @@ public class StartGamePacket extends DataPacket {
         this.putLFloat(this.pitch);
 
         this.putVarInt(this.seed);
-        this.putLShort(0x00); // SpawnBiomeType
+        this.putLShort(0x00); // SpawnBiomeType - Default
         this.putString(""); // UserDefinedBiomeName
         this.putVarInt(this.dimension);
         this.putVarInt(this.generator);
@@ -143,7 +143,7 @@ public class StartGamePacket extends DataPacket {
         this.putVarInt(this.dayCycleStopTime);
         this.putVarInt(this.eduEditionOffer);
         this.putBoolean(this.hasEduFeaturesEnabled);
-        this.putString(""); // UnknownString0
+        this.putString(""); // Education Edition Product ID
         this.putLFloat(this.rainLevel);
         this.putLFloat(this.lightningLevel);
         this.putBoolean(this.hasConfirmedPlatformLockedContent);
@@ -166,22 +166,24 @@ public class StartGamePacket extends DataPacket {
         this.putBoolean(this.isWorldTemplateOptionLocked);
         this.putBoolean(this.isOnlySpawningV1Villagers);
         this.putString(this.vanillaVersion);
-        this.putLInt(0); // UnknownInt0
-        this.putLInt(0); // UnknownInt1
-        this.putBoolean(false);
-        this.putBoolean(false);
+        this.putLInt(0); // Limited world width
+        this.putLInt(0); // Limited world height
+        this.putBoolean(false); // Nether type
+        this.putBoolean(false); // Experimental Gameplay
 
         this.putString(this.levelId);
         this.putString(this.worldName);
         this.putString(this.premiumWorldTemplateId);
         this.putBoolean(this.isTrial);
-        this.putBoolean(this.isMovementServerAuthoritative);
+        this.putUnsignedVarInt(this.isMovementServerAuthoritative ? 1 : 0); // 2 - rewind
         this.putLLong(this.currentTick);
         this.putVarInt(this.enchantmentSeed);
         this.put(GlobalBlockPalette.BLOCK_PALETTE);
         this.put(ITEM_DATA_PALETTE);
         this.putString(this.multiplayerCorrelationId);
         this.putBoolean(this.isInventoryServerAuthoritative);
+
+        this.putVarInt(0); //...
     }
 
     private static class ItemData {

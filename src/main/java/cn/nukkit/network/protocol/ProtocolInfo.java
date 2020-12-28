@@ -14,12 +14,12 @@ public interface ProtocolInfo {
      * Actual Minecraft: PE protocol version
      */
     @SuppressWarnings("UnnecessaryBoxing")
-    int CURRENT_PROTOCOL = Integer.valueOf("408"); // DO NOT REMOVE BOXING
+    int CURRENT_PROTOCOL = Integer.valueOf("410"); // DO NOT REMOVE BOXING
 
     List<Integer> SUPPORTED_PROTOCOLS = Ints.asList(CURRENT_PROTOCOL);
 
-    String MINECRAFT_VERSION = "v1.16.20";
-    String MINECRAFT_VERSION_NETWORK = "1.16.20";
+    String MINECRAFT_VERSION = "v1.16.100.51 beta";
+    String MINECRAFT_VERSION_NETWORK = "1.16.100";
 
     byte LOGIN_PACKET = 0x01;
     byte PLAY_STATUS_PACKET = 0x02;

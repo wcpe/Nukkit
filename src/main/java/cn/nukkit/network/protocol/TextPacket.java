@@ -61,6 +61,10 @@ public class TextPacket extends DataPacket {
         }
         this.xboxUserId = this.getString();
         this.platformChatId = this.getString();
+
+        if (this.type == TYPE_CHAT || this.type == TYPE_POPUP) {
+            this.getString(); //...
+        }
     }
 
     @Override
@@ -92,5 +96,9 @@ public class TextPacket extends DataPacket {
         }
         this.putString(this.xboxUserId);
         this.putString(this.platformChatId);
+
+        if (this.type == TYPE_CHAT || this.type == TYPE_POPUP) {
+            this.putString(""); //...
+        }
     }
 }
