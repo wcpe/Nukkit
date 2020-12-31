@@ -143,7 +143,6 @@ public class Anvil extends BaseLevelProvider {
 
         for (int i = 0; i < count; i++) {
             sections[i].writeTo(stream);
-            //sections[i].writeToLegacy(stream);
         }
 
         stream.put(chunk.getBiomeIdArray());

@@ -48,7 +48,5 @@ public interface ChunkSection {
 
     void writeTo(BinaryStream stream);
 
-    void writeToLegacy(BinaryStream stream);
-
     ChunkSection copy();
 }

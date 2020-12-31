@@ -327,16 +327,6 @@ public class ChunkSection implements cn.nukkit.level.format.ChunkSection {
         }
     }
 
-    @Override
-    public void writeToLegacy(BinaryStream stream) {
-        stream.putByte((byte) 0); // subChunkVersion
-
-        synchronized (this.storage) {
-            stream.put(this.storage.getBlockIds());
-            stream.put(this.storage.getBlockData());
-        }
-    }
-
     public boolean compress() {
         if (blockLight != null) {
             byte[] arr1 = blockLight;

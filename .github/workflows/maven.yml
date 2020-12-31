@@ -1,6 +1,6 @@
 name: Java CI
 
-on: [pull_request]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -21,8 +21,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Install dependencies
+        run: |
+          git clone https://github.com/EaseCation/Network.git target/Network
+          cd target/Network
+          mvn -B clean install
       - name: Build with Maven
-        run: mvn -B package
+        run: mvn -B clean package
       - name: Archive artifacts
         uses: actions/upload-artifact@v1
         if: success()

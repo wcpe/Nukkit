@@ -23,7 +23,12 @@ jobs:
             - ~/.m2
           key: nukkit-{{ checksum "pom.xml" }}
 
-      - run: mvn clean package
+      - run: |
+          git clone https://github.com/EaseCation/Network.git target/Network
+          cd target/Network
+          mvn -B clean install
+
+      - run: mvn -B clean package
 
       - store_test_results:
           path: target/surefire-reports

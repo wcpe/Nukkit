@@ -106,7 +106,7 @@ public class StartGamePacket extends DataPacket {
     public String vanillaVersion = ProtocolInfo.MINECRAFT_VERSION_NETWORK;
     public String levelId = ""; //base64 string, usually the same as world folder name in vanilla
     public String worldName;
-    public String premiumWorldTemplateId = "";
+    public String premiumWorldTemplateId = "00000000-0000-0000-0000-000000000000";
     public boolean isTrial = false;
     public boolean isMovementServerAuthoritative;
     public boolean isInventoryServerAuthoritative;
@@ -133,7 +133,7 @@ public class StartGamePacket extends DataPacket {
 
         this.putVarInt(this.seed);
         this.putLShort(0x00); // SpawnBiomeType - Default
-        this.putString(""); // UserDefinedBiomeName
+        this.putString("plains"); // UserDefinedBiomeName
         this.putVarInt(this.dimension);
         this.putVarInt(this.generator);
         this.putVarInt(this.worldGamemode);
@@ -166,8 +166,8 @@ public class StartGamePacket extends DataPacket {
         this.putBoolean(this.isWorldTemplateOptionLocked);
         this.putBoolean(this.isOnlySpawningV1Villagers);
         this.putString(this.vanillaVersion);
-        this.putLInt(0); // Limited world width
-        this.putLInt(0); // Limited world height
+        this.putLInt(16); // Limited world width
+        this.putLInt(16); // Limited world height
         this.putBoolean(false); // Nether type
         this.putBoolean(false); // Experimental Gameplay
 
