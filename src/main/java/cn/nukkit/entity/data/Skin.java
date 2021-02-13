@@ -235,7 +235,7 @@ public class Skin {
     }
 
     public boolean isTrusted() {
-        return trusted;
+        return true;
     }
 
     public void setTrusted(boolean trusted) {
