@@ -2046,6 +2046,8 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         startGamePacket.worldName = this.getServer().getNetwork().getName();
         startGamePacket.generator = 1; //0 old, 1 infinite, 2 flat
         //startGamePacket.isInventoryServerAuthoritative = true;
+        startGamePacket.isMovementServerAuthoritative = true; //facepalm Netease...
+        startGamePacket.currentTick = this.server.getTick();
         this.dataPacket(startGamePacket);
 
         this.dataPacket(new BiomeDefinitionListPacket());
@@ -2365,6 +2367,140 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                         }
                     }
 
+                    break;
+                case ProtocolInfo.PLAYER_AUTH_INPUT_PACKET:
+                    if (this.teleportPosition != null) {
+                        break;
+                    }
+
+                    PlayerAuthInputPacket playerAuthInputPacket = (PlayerAuthInputPacket) packet;
+                    newPos = new Vector3(playerAuthInputPacket.x, playerAuthInputPacket.y - this.getEyeHeight(), playerAuthInputPacket.z);
+
+                    if (newPos.distanceSquared(this) < 0.01 && playerAuthInputPacket.yaw % 360 == this.yaw && playerAuthInputPacket.pitch % 360 == this.pitch) {
+                        break;
+                    }
+
+                    if (newPos.distanceSquared(this) > 100) {
+                        this.sendPosition(this, playerAuthInputPacket.yaw, playerAuthInputPacket.pitch, MovePlayerPacket.MODE_RESET);
+                        break;
+                    }
+
+                    revert = false;
+                    if (!this.isAlive() || !this.spawned) {
+                        revert = true;
+                        this.forceMovement = new Vector3(this.x, this.y, this.z);
+                    }
+
+                    if (this.forceMovement != null && (newPos.distanceSquared(this.forceMovement) > 0.1 || revert)) {
+                        this.sendPosition(this.forceMovement, playerAuthInputPacket.yaw, playerAuthInputPacket.pitch, MovePlayerPacket.MODE_RESET);
+                    } else {
+                        playerAuthInputPacket.yaw %= 360;
+                        playerAuthInputPacket.pitch %= 360;
+
+                        if (playerAuthInputPacket.yaw < 0) {
+                            playerAuthInputPacket.yaw += 360;
+                        }
+
+                        this.setRotation(playerAuthInputPacket.yaw, playerAuthInputPacket.pitch);
+                        this.newPosition = newPos;
+                        this.forceMovement = null;
+                    }
+
+                    long inputFlags = playerAuthInputPacket.inputFlags;
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_START_SPRINTING)) != 0 && !this.isSprinting()) {
+                        PlayerToggleSprintEvent playerToggleSprintEvent = new PlayerToggleSprintEvent(this, true);
+                        this.server.getPluginManager().callEvent(playerToggleSprintEvent);
+                        if (playerToggleSprintEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setSprinting(true);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_STOP_SPRINTING)) != 0 && this.isSprinting()) {
+                        PlayerToggleSprintEvent playerToggleSprintEvent = new PlayerToggleSprintEvent(this, false);
+                        this.server.getPluginManager().callEvent(playerToggleSprintEvent);
+                        if (playerToggleSprintEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setSprinting(false);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_START_SNEAKING)) != 0 && !this.isSneaking()) {
+                        PlayerToggleSneakEvent playerToggleSneakEvent = new PlayerToggleSneakEvent(this, true);
+                        this.server.getPluginManager().callEvent(playerToggleSneakEvent);
+                        if (playerToggleSneakEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setSneaking(true);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_STOP_SNEAKING)) != 0 && this.isSneaking()) {
+                        PlayerToggleSneakEvent playerToggleSneakEvent = new PlayerToggleSneakEvent(this, false);
+                        this.server.getPluginManager().callEvent(playerToggleSneakEvent);
+                        if (playerToggleSneakEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setSneaking(false);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_START_SWIMMING)) != 0 && !this.isSwimming()) {
+                        PlayerToggleSwimEvent playerToggleSwimEvent = new PlayerToggleSwimEvent(this, true);
+                        this.server.getPluginManager().callEvent(playerToggleSwimEvent);
+
+                        if (playerToggleSwimEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setSwimming(true);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_STOP_SWIMMING)) != 0 && this.isSwimming()) {
+                        PlayerToggleSwimEvent playerToggleSwimEvent = new PlayerToggleSwimEvent(this, false);
+                        this.server.getPluginManager().callEvent(playerToggleSwimEvent);
+
+                        if (playerToggleSwimEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setSwimming(false);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_START_JUMPING)) != 0) {
+                        this.server.getPluginManager().callEvent(new PlayerJumpEvent(this));
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_START_GLIDING)) != 0 && !this.isGliding()) {
+                        PlayerToggleGlideEvent playerToggleGlideEvent = new PlayerToggleGlideEvent(this, true);
+                        this.server.getPluginManager().callEvent(playerToggleGlideEvent);
+                        if (playerToggleGlideEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setGliding(true);
+                        }
+                    }
+                    if ((inputFlags & (1L << PlayerAuthInputPacket.FLAG_STOP_GLIDING)) != 0 && this.isGliding()) {
+                        PlayerToggleGlideEvent playerToggleGlideEvent = new PlayerToggleGlideEvent(this, false);
+                        this.server.getPluginManager().callEvent(playerToggleGlideEvent);
+                        if (playerToggleGlideEvent.isCancelled()) {
+                            this.sendData(this);
+                        } else {
+                            this.setGliding(false);
+                        }
+                    }
+
+                    if (this.riding != null) {
+                        if (this.riding instanceof EntityMinecartAbstract) {
+                            ((EntityMinecartAbstract) this.riding).setCurrentSpeed(playerAuthInputPacket.moveVecZ);
+                        } else if (this.riding instanceof EntityBoat) {
+                            this.riding.setPositionAndRotation(this.temporalVector.setComponents(playerAuthInputPacket.x, playerAuthInputPacket.y - 1, playerAuthInputPacket.z), (playerAuthInputPacket.headYaw + 90) % 360, 0);
+                        }
+                    }
+
+                    break;
+                case ProtocolInfo.TICK_SYNC_PACKET:
+                    TickSyncPacket tickSyncPacket = (TickSyncPacket) packet;
+
+                    TickSyncPacket tickResponsePacket = new TickSyncPacket();
+                    tickResponsePacket.clientSendTime = tickSyncPacket.clientSendTime;
+                    tickResponsePacket.serverReceiveTime = this.server.getTick();
+                    this.dataPacket(tickResponsePacket);
                     break;
                 case ProtocolInfo.ADVENTURE_SETTINGS_PACKET:
                     //TODO: player abilities, check for other changes
