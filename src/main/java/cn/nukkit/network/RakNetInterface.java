@@ -7,6 +7,7 @@ import cn.nukkit.event.server.QueryRegenerateEvent;
 import cn.nukkit.network.protocol.BatchPacket;
 import cn.nukkit.network.protocol.DataPacket;
 import cn.nukkit.network.protocol.ProtocolInfo;
+import cn.nukkit.scheduler.NukkitRunnable;
 import cn.nukkit.utils.BinaryStream;
 import cn.nukkit.utils.Utils;
 import com.google.common.base.Preconditions;
@@ -42,6 +43,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Log4j2
 public class RakNetInterface implements RakNetServerListener, AdvancedSourceInterface {
+    private static final boolean RECEIVE_PACKET_VIOLATION_WARNING = false;
 
     private final Server server;
 
@@ -112,7 +114,7 @@ public class RakNetInterface implements RakNetServerListener, AdvancedSourceInte
         while (iterator.hasNext()) {
             NukkitRakNetSession nukkitSession = iterator.next();
             Player player = nukkitSession.player;
-            if (nukkitSession.disconnectReason != null) {
+            if (!RECEIVE_PACKET_VIOLATION_WARNING && nukkitSession.disconnectReason != null) {
                 player.close(player.getLeaveMessage(), nukkitSession.disconnectReason, false);
                 iterator.remove();
                 continue;
@@ -125,6 +127,14 @@ public class RakNetInterface implements RakNetServerListener, AdvancedSourceInte
                     log.error(new FormattedMessage("An error occurred whilst handling {} for {}",
                             new Object[]{packet.getClass().getSimpleName(), nukkitSession.player.getName()}, e));
                 }
+            }
+            if (RECEIVE_PACKET_VIOLATION_WARNING && nukkitSession.disconnectReason != null) {
+                new NukkitRunnable() {
+                    @Override
+                    public void run() {
+                        player.close(player.getLeaveMessage(), nukkitSession.disconnectReason, false);
+                    }
+                }.runTaskLater(null, 100);
             }
         }
         return true;
