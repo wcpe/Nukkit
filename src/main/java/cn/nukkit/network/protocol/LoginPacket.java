@@ -99,15 +99,27 @@ public class LoginPacket extends DataPacket {
         }
 
         if (skinToken.has("SkinResourcePatch")) {
-            skin.setSkinResourcePatch(new String(Base64.getDecoder().decode(skinToken.get("SkinResourcePatch").getAsString()), StandardCharsets.UTF_8));
+            try {
+                skin.setSkinResourcePatch(new String(Base64.getDecoder().decode(skinToken.get("SkinResourcePatch").getAsString()), StandardCharsets.UTF_8));
+            } catch (IllegalArgumentException e) {
+                skin.setSkinResourcePatch(new String(Base64.getUrlDecoder().decode(skinToken.get("SkinResourcePatch").getAsString()), StandardCharsets.UTF_8));
+            }
         }
 
         if (skinToken.has("SkinGeometryData")) {
-            skin.setGeometryData(new String(Base64.getDecoder().decode(skinToken.get("SkinGeometryData").getAsString()), StandardCharsets.UTF_8));
+            try {
+                skin.setGeometryData(new String(Base64.getDecoder().decode(skinToken.get("SkinGeometryData").getAsString()), StandardCharsets.UTF_8));
+            } catch (IllegalArgumentException e) {
+                skin.setGeometryData(new String(Base64.getUrlDecoder().decode(skinToken.get("SkinGeometryData").getAsString()), StandardCharsets.UTF_8));
+            }
         }
 
         if (skinToken.has("AnimationData")) {
-            skin.setAnimationData(new String(Base64.getDecoder().decode(skinToken.get("AnimationData").getAsString()), StandardCharsets.UTF_8));
+            try {
+                skin.setAnimationData(new String(Base64.getDecoder().decode(skinToken.get("AnimationData").getAsString()), StandardCharsets.UTF_8));
+            } catch (IllegalArgumentException e) {
+                skin.setAnimationData(new String(Base64.getUrlDecoder().decode(skinToken.get("AnimationData").getAsString()), StandardCharsets.UTF_8));
+            }
         }
 
         if (skinToken.has("AnimatedImageData")) {
@@ -141,13 +153,22 @@ public class LoginPacket extends DataPacket {
     private JsonObject decodeToken(String token) {
         String[] base = token.split("\\.");
         if (base.length < 2) return null;
-        return new Gson().fromJson(new String(Base64.getDecoder().decode(base[1]), StandardCharsets.UTF_8), JsonObject.class);
+        try {
+            return new Gson().fromJson(new String(Base64.getDecoder().decode(base[1]), StandardCharsets.UTF_8), JsonObject.class);
+        } catch (IllegalArgumentException e) {
+            return new Gson().fromJson(new String(Base64.getUrlDecoder().decode(base[1]), StandardCharsets.UTF_8), JsonObject.class);
+        }
     }
 
     private static SkinAnimation getAnimation(JsonObject element) {
         float frames = element.get("Frames").getAsFloat();
         int type = element.get("Type").getAsInt();
-        byte[] data = Base64.getDecoder().decode(element.get("Image").getAsString());
+        byte[] data;
+        try {
+            data = Base64.getDecoder().decode(element.get("Image").getAsString());
+        } catch (IllegalArgumentException e) {
+            data = Base64.getUrlDecoder().decode(element.get("Image").getAsString());
+        }
         int width = element.get("ImageWidth").getAsInt();
         int height = element.get("ImageHeight").getAsInt();
         int expression = element.get("AnimationExpression").getAsInt();
@@ -156,7 +177,12 @@ public class LoginPacket extends DataPacket {
 
     private static SerializedImage getImage(JsonObject token, String name) {
         if (token.has(name + "Data")) {
-            byte[] skinImage = Base64.getDecoder().decode(token.get(name + "Data").getAsString());
+            byte[] skinImage;
+            try {
+                skinImage = Base64.getDecoder().decode(token.get(name + "Data").getAsString());
+            } catch (IllegalArgumentException e) {
+                skinImage = Base64.getUrlDecoder().decode(token.get(name + "Data").getAsString());
+            }
             if (token.has(name + "ImageHeight") && token.has(name + "ImageWidth")) {
                 int width = token.get(name + "ImageWidth").getAsInt();
                 int height = token.get(name + "ImageHeight").getAsInt();
