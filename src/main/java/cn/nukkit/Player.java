@@ -53,6 +53,7 @@ import cn.nukkit.metadata.MetadataValue;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.network.Network;
+import cn.nukkit.network.RakNetInterface;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.*;
 import cn.nukkit.network.protocol.types.ContainerIds;
@@ -2037,6 +2038,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         this.server.onPlayerCompleteLoginSequence(this);
     }
 
+    protected void setupNetworkEncryption() {
+        if (this.interfaz instanceof RakNetInterface) {
+            ((RakNetInterface) this.interfaz).enableEncryption(this);
+        }
+    }
+
     public void handleDataPacket(DataPacket packet) {
         if (!connected) {
             return;
@@ -2097,6 +2104,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     this.setDataProperty(new StringEntityData(DATA_NAMETAG, this.username), false);
 
                     this.loginChainData = ClientChainData.read(loginPacket);
+
+                    if (this.server.isNetworkEncryptionEnabled()) {
+                        this.setupNetworkEncryption();
+                    }
 
                     if (!loginChainData.isXboxAuthed() && server.getPropertyBoolean("xbox-auth")) {
                         this.close("", "disconnectionScreen.notAuthenticated");
