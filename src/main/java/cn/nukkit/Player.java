@@ -5127,9 +5127,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         if (ev.isCancelled()) {
             fishingHook.close();
         } else {
-            fishingHook.spawnToAll();
             this.fishing = fishingHook;
             fishingHook.rod = fishingRod;
+            fishingHook.checkLure();
+            fishingHook.spawnToAll();
         }
     }
 
