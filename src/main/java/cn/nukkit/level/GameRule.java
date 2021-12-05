@@ -23,7 +23,7 @@ public enum GameRule {
     SEND_COMMAND_FEEDBACK("sendCommandFeedback"),
     SHOW_COORDINATES("showCoordinates"),
     TNT_EXPLODES("tntExplodes"),
-    SHOW_DEATH_MESSAGE("showDeathMessage");
+    SHOW_DEATH_MESSAGE("showDeathMessages");
 
     private final String name;
 
@@ -36,6 +36,10 @@ public enum GameRule {
             if (gameRule.getName().equalsIgnoreCase(gameRuleString)) {
                 return Optional.of(gameRule);
             }
+        }
+        // Backwards compatibility
+        if (gameRuleString.equalsIgnoreCase("showDeathMessage")) {
+            return Optional.of(SHOW_DEATH_MESSAGE);
         }
         return Optional.empty();
     }
