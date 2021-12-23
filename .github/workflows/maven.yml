@@ -23,7 +23,7 @@ jobs:
           java-version: 1.8
       - name: Install dependencies
         run: |
-          git clone https://github.com/EaseCation/Network.git target/Network
+          git clone --no-tags --depth 1 -b develop https://github.com/EaseCation/Network.git target/Network
           cd target/Network
           mvn -B clean install
       - name: Build with Maven
