@@ -1,0 +1,37 @@
+version: 2
+jobs:
+  build:
+
+    working_directory: ~/nukkit
+
+    docker:
+      - image: cimg/openjdk:8.0
+
+    steps:
+
+      - checkout
+
+      - run: git submodule update --init
+
+      - restore_cache:
+          key: nukkit-{{ checksum "pom.xml" }}
+
+      - run: mvn dependency:go-offline
+
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: nukkit-{{ checksum "pom.xml" }}
+
+      - run: |
+          git clone https://github.com/EaseCation/Network.git target/Network
+          cd target/Network
+          mvn -B clean install
+
+      - run: mvn -B clean package
+
+      - store_test_results:
+          path: target/surefire-reports
+
+      - store_artifacts:
+          path: target/nukkit-1.0-SNAPSHOT.jar
