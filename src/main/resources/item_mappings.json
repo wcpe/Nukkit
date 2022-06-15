@@ -24,7 +24,9 @@
     "4": "minecraft:tropical_fish_bucket",
     "5": "minecraft:pufferfish_bucket",
     "8": "minecraft:water_bucket",
-    "10": "minecraft:lava_bucket"
+    "10": "minecraft:lava_bucket",
+    "11": "minecraft:powder_snow_bucket",
+    "12": "minecraft:axolotl_bucket"
   },
   "minecraft:coal": {
     "1": "minecraft:charcoal"
@@ -49,7 +51,8 @@
     "16": "minecraft:black_dye",
     "17": "minecraft:brown_dye",
     "18": "minecraft:blue_dye",
-    "19": "minecraft:white_dye"
+    "19": "minecraft:white_dye",
+    "20": "minecraft:glow_ink_sac"
   },
   "minecraft:spawn_egg": {
     "0": "",
