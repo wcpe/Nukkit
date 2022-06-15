@@ -3,9 +3,9 @@ package cn.nukkit.entity.data;
 import cn.nukkit.nbt.stream.FastByteArrayOutputStream;
 import cn.nukkit.utils.*;
 import com.google.common.base.Preconditions;
+import com.nimbusds.jose.shaded.json.JSONObject;
+import com.nimbusds.jose.shaded.json.JSONValue;
 import lombok.ToString;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -33,6 +33,7 @@ public class Skin {
 
     private final String fullSkinId = UUID.randomUUID().toString();
     private String skinId;
+    private String playFabId = "";
     private String skinResourcePatch = GEOMETRY_CUSTOM;
     private SerializedImage skinData;
     private final List<SkinAnimation> animations = new ArrayList<>();
@@ -260,6 +261,21 @@ public class Skin {
 
     public String getFullSkinId() {
         return fullSkinId;
+    }
+
+    public void setPlayFabId(String playFabId) {
+        this.playFabId = playFabId;
+    }
+
+    public String getPlayFabId() {
+        if (this.persona && (this.playFabId == null || this.playFabId.isEmpty())) {
+            try {
+                this.playFabId = this.skinId.split("-")[5];
+            } catch (Exception e) {
+                this.playFabId = this.fullSkinId.replace("-", "").substring(16);
+            }
+        }
+        return this.playFabId;
     }
 
     private static SerializedImage parseBufferedImage(BufferedImage image) {

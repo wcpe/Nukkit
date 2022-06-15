@@ -19,9 +19,11 @@ import cn.nukkit.event.level.LevelLoadEvent;
 import cn.nukkit.event.server.BatchPacketsEvent;
 import cn.nukkit.event.server.PlayerDataSerializeEvent;
 import cn.nukkit.event.server.QueryRegenerateEvent;
+import cn.nukkit.event.server.ServerStopEvent;
 import cn.nukkit.inventory.CraftingManager;
 import cn.nukkit.inventory.Recipe;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.lang.BaseLang;
 import cn.nukkit.lang.TextContainer;
@@ -44,6 +46,7 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.metadata.EntityMetadataStore;
 import cn.nukkit.metadata.LevelMetadataStore;
 import cn.nukkit.metadata.PlayerMetadataStore;
+import cn.nukkit.metrics.NukkitMetrics;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.DoubleTag;
@@ -462,11 +465,15 @@ public class Server {
         this.consoleSender = new ConsoleCommandSender();
         this.commandMap = new SimpleCommandMap(this);
 
+        // Initialize metrics
+        new NukkitMetrics(this);
+
         this.registerEntities();
         this.registerBlockEntities();
 
         Block.init();
         Enchantment.init();
+        RuntimeItems.init();
         Item.init();
         EnumBiome.values(); //load class, this also registers biomes
         Effect.init();
@@ -828,6 +835,9 @@ public class Server {
             isRunning.compareAndSet(true, false);
 
             this.hasStopped = true;
+
+            ServerStopEvent serverStopEvent = new ServerStopEvent();
+            getPluginManager().callEvent(serverStopEvent);
 
             if (this.rcon != null) {
                 this.rcon.close();
@@ -1472,7 +1482,11 @@ public class Server {
     }
 
     public String getSubMotd() {
-        return this.getPropertyString("sub-motd", "https://nukkitx.com");
+        String subMotd = this.getPropertyString("sub-motd", "https://nukkitx.com");
+        if (subMotd.isEmpty()) {
+            subMotd = "https://nukkitx.com"; // The client doesn't allow empty sub-motd in 1.16.210
+        }
+        return subMotd;
     }
 
     public boolean getForceResources() {
@@ -2187,7 +2201,7 @@ public class Server {
     }
 
     public boolean isOp(String name) {
-        return this.operators.exists(name, true);
+        return name != null && this.operators.exists(name, true);
     }
 
     public Config getWhitelist() {
