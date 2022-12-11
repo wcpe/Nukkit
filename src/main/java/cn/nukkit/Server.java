@@ -177,6 +177,7 @@ public class Server {
     private boolean networkCompressionAsync = true;
     public int networkCompressionLevel = 7;
     private int networkZlibProvider = 0;
+    private boolean networkEncryption;
 
     private boolean autoTickRate = true;
     private int autoTickRateLimit = 20;
@@ -405,6 +406,7 @@ public class Server {
 
         this.networkCompressionLevel = this.getConfig("network.compression-level", 7);
         this.networkCompressionAsync = this.getConfig("network.async-compression", true);
+        this.networkEncryption = this.getConfig("network.enable-encryption", true);
 
         this.autoTickRate = this.getConfig("level-settings.auto-tick-rate", true);
         this.autoTickRateLimit = this.getConfig("level-settings.auto-tick-rate-limit", 20);
@@ -2401,6 +2403,10 @@ public class Server {
 
     public boolean isNetherAllowed() {
         return this.allowNether;
+    }
+
+    public boolean isNetworkEncryptionEnabled() {
+        return this.networkEncryption;
     }
 
     public PlayerDataSerializer getPlayerDataSerializer() {
