@@ -70,7 +70,7 @@ public class StartGamePacket extends DataPacket {
     public String vanillaVersion = ProtocolInfo.MINECRAFT_VERSION_NETWORK;
     public String levelId = ""; //base64 string, usually the same as world folder name in vanilla
     public String worldName;
-    public String premiumWorldTemplateId = "";
+    public String premiumWorldTemplateId = "00000000-0000-0000-0000-000000000000";
     public boolean isTrial = false;
     public boolean isMovementServerAuthoritative;
     public boolean isInventoryServerAuthoritative;
@@ -79,6 +79,8 @@ public class StartGamePacket extends DataPacket {
     public int enchantmentSeed;
 
     public String multiplayerCorrelationId = "";
+
+    public boolean clientSideGenerationEnabled;
 
     @Override
     public void decode() {
@@ -152,7 +154,9 @@ public class StartGamePacket extends DataPacket {
         this.put(RuntimeItems.getMapping().getItemPalette());
         this.putString(this.multiplayerCorrelationId);
         this.putBoolean(this.isInventoryServerAuthoritative);
-        this.putString(""); // Server Engine
+        this.putString(ProtocolInfo.MINECRAFT_VERSION_NETWORK); // Server Engine
         this.putLLong(0L); // BlockRegistryChecksum
+
+        this.putBoolean(this.clientSideGenerationEnabled);
     }
 }

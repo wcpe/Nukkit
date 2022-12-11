@@ -57,7 +57,6 @@
     "20": "minecraft:glow_ink_sac"
   },
   "minecraft:spawn_egg": {
-    "0": "",
     "10": "minecraft:chicken_spawn_egg",
     "11": "minecraft:cow_spawn_egg",
     "12": "minecraft:pig_spawn_egg",
@@ -128,6 +127,7 @@
     "128": "minecraft:goat_spawn_egg",
     "129": "minecraft:glow_squid_spawn_egg",
     "130": "minecraft:axolotl_spawn_egg",
+    "131": "minecraft:warden_spawn_egg",
     "132": "minecraft:frog_spawn_egg",
     "133": "minecraft:tadpole_spawn_egg",
     "134": "minecraft:allay_spawn_egg",
