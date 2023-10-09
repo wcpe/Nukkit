@@ -20,18 +20,18 @@
     <distributionManagement>
         <repository>
             <id>maven-release</id>
-            <url>http://maven.wcpe.top/repository/maven-releases/</url>
+            <url>https://maven.wcpe.top/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>maven-snapshots</id>
-            <url>http://maven.wcpe.top/repository/maven-snapshots/</url>
+            <url>https://maven.wcpe.top/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
     <repositories>
         <repository>
             <id>wcpe-maven-public</id>
-            <url>http://maven.wcpe.top/repository/maven-public/</url>
+            <url>https://maven.wcpe.top/repository/maven-public/</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
