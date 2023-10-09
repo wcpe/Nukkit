@@ -5,7 +5,7 @@
     <name>Nukkit</name>
     <groupId>cn.nukkit</groupId>
     <artifactId>nukkit</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-netease-SNAPSHOT</version>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -17,7 +17,28 @@
         <jline.version>3.9.0</jline.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>maven-release</id>
+            <url>http://maven.wcpe.top/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>http://maven.wcpe.top/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <repositories>
+        <repository>
+            <id>wcpe-maven-public</id>
+            <url>http://maven.wcpe.top/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
         <repository>
             <id>opencollab-repo-release</id>
             <url>https://repo.opencollab.dev/maven-releases/</url>
@@ -44,7 +65,7 @@
         <dependency>
             <groupId>com.nukkitx.network</groupId>
             <artifactId>raknet</artifactId>
-            <version>1.6.28-SNAPSHOT</version>
+            <version>1.6.28-netease-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
