@@ -12,7 +12,6 @@ import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.utils.TextFormat;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -36,12 +35,14 @@ public class GiveCommand extends VanillaCommand {
                 CommandParameter.newType("amount", true, CommandParamType.INT),
                 CommandParameter.newType("tags", true, CommandParamType.RAWTEXT)
         });
+/*
         this.commandParameters.put("toPlayerByIdMeta", new CommandParameter[]{
                 CommandParameter.newType("player", CommandParamType.TARGET),
                 CommandParameter.newType("itemAndData", CommandParamType.STRING),
                 CommandParameter.newType("amount", true, CommandParamType.INT),
                 CommandParameter.newType("tags", true, CommandParamType.RAWTEXT)
         });
+*/
     }
 
     @Override

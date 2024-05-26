@@ -90,6 +90,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -2057,6 +2058,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         startGamePacket.worldName = this.getServer().getNetwork().getName();
         startGamePacket.generator = 1; //0 old, 1 infinite, 2 flat
         startGamePacket.isMovementServerAuthoritative = true;
+        startGamePacket.enchantmentSeed = ThreadLocalRandom.current().nextInt();
         this.dataPacket(startGamePacket);
 
         this.dataPacket(new BiomeDefinitionListPacket());
@@ -2459,6 +2461,10 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
                     if (this.riding instanceof EntityMinecartAbstract) {
                         ((EntityMinecartAbstract) riding).setCurrentSpeed(authPacket.getMotion().getY());
                         break;
+                    }
+
+                    if (!this.isSpectator() && authPacket.getInputData().contains(AuthInputAction.MISSED_SWING)) {
+                        level.addLevelSoundEvent(this, LevelSoundEventPacket.SOUND_ATTACK_NODAMAGE, -1, "minecraft:player", false, false);
                     }
 
                     if (authPacket.getInputData().contains(AuthInputAction.START_SPRINTING)) {
@@ -5447,6 +5453,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
             fishingHook.rod = fishingRod;
             fishingHook.checkLure();
             fishingHook.spawnToAll();
+            this.level.addLevelSoundEvent(this, LevelSoundEventPacket.SOUND_THROW, -1, "minecraft:player", false, false);
         }
     }
 

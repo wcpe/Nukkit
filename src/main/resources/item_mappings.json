@@ -106,7 +106,9 @@
     "3": "minecraft:jungle_boat",
     "4": "minecraft:acacia_boat",
     "5": "minecraft:dark_oak_boat",
-    "6": "minecraft:mangrove_boat"
+    "6": "minecraft:mangrove_boat",
+    "7": "minecraft:bamboo_raft",
+    "8": "minecraft:cherry_boat"
   },
   "minecraft:bucket": {
     "0": "minecraft:bucket",
@@ -148,7 +150,6 @@
     "20": "minecraft:glow_ink_sac"
   },
   "minecraft:spawn_egg": {
-    "0": "",
     "10": "minecraft:chicken_spawn_egg",
     "11": "minecraft:cow_spawn_egg",
     "12": "minecraft:pig_spawn_egg",
@@ -224,6 +225,9 @@
     "131": "minecraft:warden_spawn_egg",
     "132": "minecraft:frog_spawn_egg",
     "133": "minecraft:tadpole_spawn_egg",
-    "134": "minecraft:allay_spawn_egg"
+    "134": "minecraft:allay_spawn_egg",
+    "138": "minecraft:camel_spawn_egg",
+    "139": "minecraft:sniffer_spawn_egg",
+    "157": "minecraft:trader_llama_spawn_egg"
   }
 }

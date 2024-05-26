@@ -63,6 +63,8 @@ public class PlayerAuthInputPacket extends DataPacket {
         this.tick = this.getUnsignedVarLong();
         this.delta = this.getVector3f();
 
+        this.getByte(); // netease modified
+
         if (this.inputData.contains(AuthInputAction.PERFORM_ITEM_STACK_REQUEST)) {
             // TODO: this.itemStackRequest = readItemStackRequest(buf, protocolVersion);
             // We are safe to leave this for later, since it is only sent with ServerAuthInventories

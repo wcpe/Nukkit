@@ -4,10 +4,8 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.item.Item;
 import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.utils.TextFormat;
 
@@ -25,7 +23,7 @@ public class ClearCommand extends VanillaCommand {
         this.commandParameters.clear();
         this.commandParameters.put("default", new CommandParameter[]{});
         this.commandParameters.put("target", new CommandParameter[]{
-                CommandParameter.newType("player", CommandParamType.TARGET),
+                CommandParameter.newType("player", true, CommandParamType.TARGET),
         });
     }
 

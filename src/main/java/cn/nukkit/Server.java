@@ -400,7 +400,7 @@ public class Server {
         this.networkCompressionLevel = this.getConfig("network.compression-level", 7);
         this.networkCompressionAsync = this.getConfig("network.async-compression", true);
         this.networkCompressionThreshold = this.getConfig("network.batch-threshold", 256);
-        this.encryptionEnabled = this.getConfig("network.encryption", false);
+        this.encryptionEnabled = this.getConfig("network.encryption", true);
 
         if (!this.encryptionEnabled) {
             this.getLogger().warning("Encryption is not enabled. For better security, it's recommended to enable it (network.encryption=true in nukkit.yml) if you don't use a proxy software.");
