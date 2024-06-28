@@ -2,6 +2,8 @@ package cn.nukkit.network.protocol;
 
 import cn.nukkit.inventory.*;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.RuntimeItemMapping.RuntimeEntry;
+import cn.nukkit.item.RuntimeItems;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -116,9 +118,20 @@ public class CraftingDataPacket extends DataPacket {
                 case FURNACE_DATA:
                     FurnaceRecipe furnace = (FurnaceRecipe) recipe;
                     Item input = furnace.getInput();
-                    this.putVarInt(input.getId());
+                    int runtimeId;
+                    int damage;
+                    if (!input.hasMeta()) {
+                        RuntimeEntry runtimeEntry = RuntimeItems.getMapping().toRuntime(input.getId(), 0);
+                        runtimeId = runtimeEntry.getRuntimeId();
+                        damage = 0x7fff;
+                    } else {
+                        RuntimeEntry runtimeEntry = RuntimeItems.getMapping().toRuntime(input.getId(), input.getDamage());
+                        runtimeId = runtimeEntry.getRuntimeId();
+                        damage = runtimeEntry.isHasDamage() ? 0 : input.getDamage();
+                    }
+                    this.putVarInt(runtimeId);
                     if (recipe.getType() == RecipeType.FURNACE_DATA) {
-                        this.putVarInt(input.getDamage());
+                        this.putVarInt(damage);
                     }
                     this.putSlot(furnace.getResult(), true);
                     this.putString(CRAFTING_TAG_FURNACE);

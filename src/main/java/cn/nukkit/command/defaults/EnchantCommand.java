@@ -46,7 +46,7 @@ public class EnchantCommand extends VanillaCommand {
             sender.sendMessage(new TranslationContainer("commands.generic.usage", this.usageMessage));
             return true;
         }
-        Player player = sender.getServer().getPlayer(args[0]);
+        Player player = sender.getServer().getPlayer(args[0].replace("@s", sender.getName()));
         if (player == null) {
             sender.sendMessage(new TranslationContainer(TextFormat.RED + "%commands.generic.player.notFound"));
             return true;
@@ -155,6 +155,8 @@ public class EnchantCommand extends VanillaCommand {
                 return 35;
             case "soul_speed":
                 return 36;
+            case "swift_sneak":
+                return 37;
             default:
                 return Integer.parseInt(value);
         }

@@ -129,8 +129,6 @@ public class Server {
 
     private PluginManager pluginManager;
 
-    private int profilingTickrate = 20;
-
     private ServerScheduler scheduler;
 
     private int tickCounter;
@@ -144,10 +142,6 @@ public class Server {
     private float maxTick = 20;
 
     private float maxUse = 0;
-
-    private int sendUsageTicker = 0;
-
-    private boolean dispatchSignals = false;
 
     private final NukkitConsole console;
     private final ConsoleThread consoleThread;
@@ -174,15 +168,16 @@ public class Server {
 
     private Network network;
 
-    private boolean networkCompressionAsync = true;
-    public int networkCompressionLevel = 7;
-    private int networkZlibProvider = 0;
-    private boolean networkEncryption;
+    private boolean networkCompressionAsync;
+    public int networkCompressionLevel;
+    private int networkZlibProvider;
+    public int networkCompressionThreshold;
+    public boolean encryptionEnabled;
 
-    private boolean autoTickRate = true;
-    private int autoTickRateLimit = 20;
-    private boolean alwaysTickPlayers = false;
-    private int baseTickRate = 1;
+    private boolean autoTickRate;
+    private int autoTickRateLimit;
+    private boolean alwaysTickPlayers;
+    private int baseTickRate;
     private Boolean getAllowFlight = null;
     private int difficulty = Integer.MAX_VALUE;
     private int defaultGamemode = Integer.MAX_VALUE;
@@ -192,15 +187,13 @@ public class Server {
 
     private BaseLang baseLang;
 
-    private boolean forceLanguage = false;
+    private boolean forceLanguage;
 
     private UUID serverID;
 
     private final String filePath;
     private final String dataPath;
     private final String pluginPath;
-
-    private final Set<UUID> uniquePlayers = new HashSet<>();
 
     private QueryHandler queryHandler;
 
@@ -406,7 +399,12 @@ public class Server {
 
         this.networkCompressionLevel = this.getConfig("network.compression-level", 7);
         this.networkCompressionAsync = this.getConfig("network.async-compression", true);
-        this.networkEncryption = this.getConfig("network.enable-encryption", true);
+        this.networkCompressionThreshold = this.getConfig("network.batch-threshold", 256);
+        this.encryptionEnabled = this.getConfig("network.encryption", true);
+
+        if (!this.encryptionEnabled) {
+            this.getLogger().warning("Encryption is not enabled. For better security, it's recommended to enable it (network.encryption=true in nukkit.yml) if you don't use a proxy software.");
+        }
 
         this.autoTickRate = this.getConfig("level-settings.auto-tick-rate", true);
         this.autoTickRateLimit = this.getConfig("level-settings.auto-tick-rate-limit", 20);
@@ -980,9 +978,7 @@ public class Server {
     }
 
     public void onPlayerLogin(Player player) {
-        if (this.sendUsageTicker > 0) {
-            this.uniquePlayers.add(player.getUniqueId());
-        }
+
     }
 
     public void addPlayer(InetSocketAddress socketAddress, Player player) {
@@ -1203,11 +1199,6 @@ public class Server {
         if (this.autoSave && ++this.autoSaveTicker >= this.autoSaveTicks) {
             this.autoSaveTicker = 0;
             this.doAutoSave();
-        }
-
-        if (this.sendUsageTicker > 0 && --this.sendUsageTicker == 0) {
-            this.sendUsageTicker = 6000;
-            //todo sendUsage
         }
 
         if (this.tickCounter % 100 == 0) {
@@ -2302,12 +2293,14 @@ public class Server {
         Entity.registerEntity("Endermite", EntityEndermite.class);
         Entity.registerEntity("Evoker", EntityEvoker.class);
         Entity.registerEntity("Ghast", EntityGhast.class);
+        Entity.registerEntity("GlowSquid", EntityGlowSquid.class);
         Entity.registerEntity("Guardian", EntityGuardian.class);
         Entity.registerEntity("Hoglin", EntityHoglin.class);
         Entity.registerEntity("Husk", EntityHusk.class);
         Entity.registerEntity("MagmaCube", EntityMagmaCube.class);
         Entity.registerEntity("Phantom", EntityPhantom.class);
         Entity.registerEntity("Piglin", EntityPiglin.class);
+        Entity.registerEntity("PiglinBrute", EntityPiglinBrute.class);
         Entity.registerEntity("Pillager", EntityPillager.class);
         Entity.registerEntity("Ravager", EntityRavager.class);
         Entity.registerEntity("Shulker", EntityShulker.class);
@@ -2319,6 +2312,7 @@ public class Server {
         Entity.registerEntity("Stray", EntityStray.class);
         Entity.registerEntity("Vex", EntityVex.class);
         Entity.registerEntity("Vindicator", EntityVindicator.class);
+        Entity.registerEntity("Warden", EntityWarden.class);
         Entity.registerEntity("Witch", EntityWitch.class);
         Entity.registerEntity("Wither", EntityWither.class);
         Entity.registerEntity("WitherSkeleton", EntityWitherSkeleton.class);
@@ -2328,6 +2322,8 @@ public class Server {
         Entity.registerEntity("ZombieVillager", EntityZombieVillager.class);
         Entity.registerEntity("ZombieVillagerV1", EntityZombieVillagerV1.class);
         //Passive
+        Entity.registerEntity("Allay", EntityAllay.class);
+        Entity.registerEntity("Axolotl", EntityAxolotl.class);
         Entity.registerEntity("Bat", EntityBat.class);
         Entity.registerEntity("Bee", EntityBee.class);
         Entity.registerEntity("Cat", EntityCat.class);
@@ -2337,6 +2333,8 @@ public class Server {
         Entity.registerEntity("Dolphin", EntityDolphin.class);
         Entity.registerEntity("Donkey", EntityDonkey.class);
         Entity.registerEntity("Fox", EntityFox.class);
+        Entity.registerEntity("Frog", EntityFrog.class);
+        Entity.registerEntity("Goat", EntityGoat.class);
         Entity.registerEntity("Horse", EntityHorse.class);
         Entity.registerEntity("Llama", EntityLlama.class);
         Entity.registerEntity("Mooshroom", EntityMooshroom.class);
@@ -2353,6 +2351,7 @@ public class Server {
         Entity.registerEntity("SkeletonHorse", EntitySkeletonHorse.class);
         Entity.registerEntity("Squid", EntitySquid.class);
         Entity.registerEntity("Strider", EntityStrider.class);
+        Entity.registerEntity("Tadpole", EntityTadpole.class);
         Entity.registerEntity("TropicalFish", EntityTropicalFish.class);
         Entity.registerEntity("Turtle", EntityTurtle.class);
         Entity.registerEntity("Villager", EntityVillager.class);
@@ -2403,10 +2402,6 @@ public class Server {
 
     public boolean isNetherAllowed() {
         return this.allowNether;
-    }
-
-    public boolean isNetworkEncryptionEnabled() {
-        return this.networkEncryption;
     }
 
     public PlayerDataSerializer getPlayerDataSerializer() {

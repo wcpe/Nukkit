@@ -33,10 +33,12 @@ public class BanIpCommand extends VanillaCommand {
                 CommandParameter.newType("player", CommandParamType.TARGET),
                 CommandParameter.newType("reason", true, CommandParamType.STRING)
         });
+/*
         this.commandParameters.put("byIp", new CommandParameter[]{
                 CommandParameter.newType("ip", CommandParamType.STRING),
                 CommandParameter.newType("reason", true, CommandParamType.STRING)
         });
+*/
     }
 
     @Override

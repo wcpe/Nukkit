@@ -10,44 +10,24 @@ pipeline {
     stages {
         stage ('Build') {
             steps {
-                sh 'mvn clean package -B'
+                sh './gradlew shadowJar'
             }
             post {
                 success {
-                    junit 'target/surefire-reports/**/*.xml'
+//                     junit 'build/test-results/**/*.xml'
                     archiveArtifacts artifacts: 'target/nukkit-*-SNAPSHOT.jar', fingerprint: true
                 }
             }
         }
 
-        stage ('Deploy') {
+        stage ('Javadocs') {
             when {
                 branch "master"
             }
 
             steps {
-                rtMavenDeployer (
-                        id: "maven-deployer",
-                        serverId: "opencollab-artifactory",
-                        releaseRepo: "maven-releases",
-                        snapshotRepo: "maven-snapshots"
-                )
-                rtMavenResolver(
-                        id: "maven-resolver",
-                        serverId: "opencollab-artifactory",
-                        releaseRepo: "maven-deploy-release",
-                        snapshotRepo: "maven-deploy-snapshot"
-                )
-                rtMavenRun (
-                        pom: 'pom.xml',
-                        goals: 'javadoc:javadoc javadoc:jar source:jar install -B -DskipTests',
-                        deployerId: "maven-deployer",
-                        resolverId: "maven-resolver"
-                )
-                rtPublishBuildInfo (
-                        serverId: "opencollab-artifactory"
-                )
-                step([$class: 'JavadocArchiver', javadocDir: 'target/site/apidocs', keepAll: false])
+                sh './gradlew javadoc'
+                step([$class: 'JavadocArchiver', javadocDir: 'build/docs/javadoc', keepAll: false])
             }
         }
     }

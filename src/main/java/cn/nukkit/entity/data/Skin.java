@@ -31,7 +31,7 @@ public class Skin {
     public static final String GEOMETRY_CUSTOM = convertLegacyGeometryName("geometry.humanoid.custom");
     public static final String GEOMETRY_CUSTOM_SLIM = convertLegacyGeometryName("geometry.humanoid.customSlim");
 
-    private final String fullSkinId = UUID.randomUUID().toString();
+    private String fullSkinId;
     private String skinId;
     private String playFabId = "";
     private String skinResourcePatch = GEOMETRY_CUSTOM;
@@ -51,6 +51,7 @@ public class Skin {
     private String armSize = "wide";
     private boolean trusted = true;
     private String geometryDataEngineVersion = "";
+    private boolean overridingPlayerAppearance = true;
 
     public boolean isValid() {
         return isValidSkin() && isValidResourcePatch();
@@ -64,6 +65,7 @@ public class Skin {
                 (capeId == null || capeId.length() < 100) &&
                 (skinColor == null || skinColor.length() < 100) &&
                 (armSize == null || armSize.length() < 100) &&
+                (fullSkinId == null || fullSkinId.length() < 200) &&
                 (geometryDataEngineVersion == null || geometryDataEngineVersion.length() < 100);
     }
 
@@ -282,8 +284,15 @@ public class Skin {
         this.armSize = armSize;
     }
 
+    public void setFullSkinId(String fullSkinId) {
+        this.fullSkinId = fullSkinId;
+    }
+
     public String getFullSkinId() {
-        return fullSkinId;
+        if (this.fullSkinId == null) {
+            this.fullSkinId = this.getSkinId() + this.getCapeId();
+        }
+        return this.fullSkinId;
     }
 
     public void setPlayFabId(String playFabId) {
@@ -295,7 +304,7 @@ public class Skin {
             try {
                 this.playFabId = this.skinId.split("-")[5];
             } catch (Exception e) {
-                this.playFabId = this.fullSkinId.replace("-", "").substring(16);
+                this.playFabId = this.getFullSkinId().replace("-", "").substring(16);
             }
         }
         return this.playFabId;
@@ -318,5 +327,13 @@ public class Skin {
 
     private static String convertLegacyGeometryName(String geometryName) {
         return "{\"geometry\" : {\"default\" : \"" + geometryName + "\"}}";
+    }
+
+    public void setOverridingPlayerAppearance(boolean overridingPlayerAppearance) {
+        this.overridingPlayerAppearance = overridingPlayerAppearance;
+    }
+
+    public boolean isOverridingPlayerAppearance() {
+        return this.overridingPlayerAppearance;
     }
 }

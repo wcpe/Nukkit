@@ -179,11 +179,16 @@ public abstract class Entity extends Location implements Metadatable {
     public static final int DATA_NEARBY_CURED_DISCOUNT_TIMESTAMP = 117;
     public static final int DATA_HITBOX = 118;
     public static final int DATA_IS_BUOYANT = 119;
-    public static final int DATA_BASE_RUNTIME_ID = 120;
-    public static final int DATA_FREEZING_EFFECT_STRENGTH = 121;
-    public static final int DATA_BUOYANCY_DATA = 122;
-    public static final int DATA_GOAT_HORN_COUNT = 123;
-    public static final int DATA_UPDATE_PROPERTIES = 124;
+    public static final int DATA_FREEZING_EFFECT_STRENGTH = 120;
+    public static final int DATA_BUOYANCY_DATA = 121;
+    public static final int DATA_GOAT_HORN_COUNT = 122;
+    public static final int DATA_BASE_RUNTIME_ID = 123;
+    public static final int DATA_MOVEMENT_SOUND_DISTANCE_OFFSET = 124;
+    public static final int DATA_HEARTBEAT_INTERVAL_TICKS = 125;
+    public static final int DATA_HEARTBEAT_SOUND_EVENT = 126;
+    public static final int DATA_PLAYER_LAST_DEATH_POS = 127;
+    public static final int DATA_PLAYER_LAST_DEATH_DIMENSION = 128;
+    public static final int DATA_PLAYER_HAS_DIED = 129;
 
     // Flags
     public static final int DATA_FLAG_ONFIRE = 0;
@@ -232,61 +237,75 @@ public abstract class Entity extends Location implements Metadatable {
     public static final int DATA_FLAG_CHARGE_ATTACK = 43;
     public static final int DATA_FLAG_WASD_CONTROLLED = 44;
     public static final int DATA_FLAG_CAN_POWER_JUMP = 45;
-    public static final int DATA_FLAG_LINGER = 46;
-    public static final int DATA_FLAG_HAS_COLLISION = 47;
-    public static final int DATA_FLAG_GRAVITY = 48;
-    public static final int DATA_FLAG_FIRE_IMMUNE = 49;
-    public static final int DATA_FLAG_DANCING = 50;
-    public static final int DATA_FLAG_ENCHANTED = 51;
-    public static final int DATA_FLAG_SHOW_TRIDENT_ROPE = 52; // tridents show an animated rope when enchanted with loyalty after they are thrown and return to their owner. To be combined with DATA_OWNER_EID
-    public static final int DATA_FLAG_CONTAINER_PRIVATE = 53; //inventory is private, doesn't drop contents when killed if true
-    public static final int DATA_FLAG_IS_TRANSFORMING = 54;
-    public static final int DATA_FLAG_SPIN_ATTACK = 55;
-    public static final int DATA_FLAG_SWIMMING = 56;
-    public static final int DATA_FLAG_BRIBED = 57; //dolphins have this set when they go to find treasure for the player
-    public static final int DATA_FLAG_PREGNANT = 58;
-    public static final int DATA_FLAG_LAYING_EGG = 59;
-    public static final int DATA_FLAG_RIDER_CAN_PICK = 60;
-    public static final int DATA_FLAG_TRANSITION_SETTING = 61;
-    public static final int DATA_FLAG_EATING = 62;
-    public static final int DATA_FLAG_LAYING_DOWN = 63;
-    public static final int DATA_FLAG_SNEEZING = 64;
-    public static final int DATA_FLAG_TRUSTING = 65;
-    public static final int DATA_FLAG_ROLLING = 66;
-    public static final int DATA_FLAG_SCARED = 67;
-    public static final int DATA_FLAG_IN_SCAFFOLDING = 68;
-    public static final int DATA_FLAG_OVER_SCAFFOLDING = 69;
-    public static final int DATA_FLAG_FALL_THROUGH_SCAFFOLDING = 70;
-    public static final int DATA_FLAG_BLOCKING = 71;
-    public static final int DATA_FLAG_TRANSITION_BLOCKING = 72;
-    public static final int DATA_FLAG_BLOCKED_USING_SHIELD = 73;
-    public static final int DATA_FLAG_BLOCKED_USING_DAMAGED_SHIELD = 74;
-    public static final int DATA_FLAG_SLEEPING = 75;
-    public static final int DATA_FLAG_ENTITY_GROW_UP = 76;
-    public static final int DATA_FLAG_TRADE_INTEREST = 77;
-    public static final int DATA_FLAG_DOOR_BREAKER = 78;
-    public static final int DATA_FLAG_BREAKING_OBSTRUCTION = 79;
-    public static final int DATA_FLAG_DOOR_OPENER = 80;
-    public static final int DATA_FLAG_IS_ILLAGER_CAPTAIN = 81;
-    public static final int DATA_FLAG_STUNNED = 82;
-    public static final int DATA_FLAG_ROARING = 83;
-    public static final int DATA_FLAG_DELAYED_ATTACK = 84;
-    public static final int DATA_FLAG_IS_AVOIDING_MOBS = 85;
-    public static final int DATA_FLAG_IS_AVOIDING_BLOCKS = 86;
-    public static final int DATA_FLAG_FACING_TARGET_TO_RANGE_ATTACK = 87;
-    public static final int DATA_FLAG_HIDDEN_WHEN_INVISIBLE = 88;
-    public static final int DATA_FLAG_IS_IN_UI = 89;
-    public static final int DATA_FLAG_STALKING = 90;
-    public static final int DATA_FLAG_EMOTING = 91;
-    public static final int DATA_FLAG_CELEBRATING = 92;
-    public static final int DATA_FLAG_ADMIRING = 93;
-    public static final int DATA_FLAG_CELEBRATING_SPECIAL = 94;
-    public static final int DATA_FLAG_RAM_ATTACK = 96;
-    public static final int DATA_FLAG_PLAYING_DEAD = 97;
-    public static final int DATA_FLAG_IN_ASCENDABLE_BLOCK = 98;
-    public static final int DATA_FLAG_OVER_DESCENDABLE_BLOCK = 99;
-    public static final int DATA_FLAG_CROAKING = 100;
-    public static final int DATA_FLAG_EAT_MOB = 101;
+    public static final int DATA_FLAG_CAN_DASH = 46;
+    public static final int DATA_FLAG_LINGER = 47;
+    public static final int DATA_FLAG_HAS_COLLISION = 48;
+    public static final int DATA_FLAG_GRAVITY = 49;
+    public static final int DATA_FLAG_FIRE_IMMUNE = 50;
+    public static final int DATA_FLAG_DANCING = 51;
+    public static final int DATA_FLAG_ENCHANTED = 52;
+    public static final int DATA_FLAG_SHOW_TRIDENT_ROPE = 53; // tridents show an animated rope when enchanted with loyalty after they are thrown and return to their owner. To be combined with DATA_OWNER_EID
+    public static final int DATA_FLAG_CONTAINER_PRIVATE = 54; //inventory is private, doesn't drop contents when killed if true
+    public static final int DATA_FLAG_IS_TRANSFORMING = 55;
+    public static final int DATA_FLAG_SPIN_ATTACK = 56;
+    public static final int DATA_FLAG_SWIMMING = 57;
+    public static final int DATA_FLAG_BRIBED = 58; //dolphins have this set when they go to find treasure for the player
+    public static final int DATA_FLAG_PREGNANT = 59;
+    public static final int DATA_FLAG_LAYING_EGG = 60;
+    public static final int DATA_FLAG_RIDER_CAN_PICK = 61;
+    public static final int DATA_FLAG_TRANSITION_SETTING = 62;
+    public static final int DATA_FLAG_EATING = 63;
+    public static final int DATA_FLAG_LAYING_DOWN = 64;
+    public static final int DATA_FLAG_SNEEZING = 65;
+    public static final int DATA_FLAG_TRUSTING = 66;
+    public static final int DATA_FLAG_ROLLING = 67;
+    public static final int DATA_FLAG_SCARED = 68;
+    public static final int DATA_FLAG_IN_SCAFFOLDING = 69;
+    public static final int DATA_FLAG_OVER_SCAFFOLDING = 70;
+    public static final int DATA_FLAG_FALL_THROUGH_SCAFFOLDING = 71;
+    public static final int DATA_FLAG_BLOCKING = 72;
+    public static final int DATA_FLAG_TRANSITION_BLOCKING = 73;
+    public static final int DATA_FLAG_BLOCKED_USING_SHIELD = 74;
+    public static final int DATA_FLAG_BLOCKED_USING_DAMAGED_SHIELD = 75;
+    public static final int DATA_FLAG_SLEEPING = 76;
+    public static final int DATA_FLAG_ENTITY_GROW_UP = 77;
+    public static final int DATA_FLAG_TRADE_INTEREST = 78;
+    public static final int DATA_FLAG_DOOR_BREAKER = 79;
+    public static final int DATA_FLAG_BREAKING_OBSTRUCTION = 80;
+    public static final int DATA_FLAG_DOOR_OPENER = 81;
+    public static final int DATA_FLAG_IS_ILLAGER_CAPTAIN = 82;
+    public static final int DATA_FLAG_STUNNED = 83;
+    public static final int DATA_FLAG_ROARING = 84;
+    public static final int DATA_FLAG_DELAYED_ATTACK = 85;
+    public static final int DATA_FLAG_IS_AVOIDING_MOBS = 86;
+    public static final int DATA_FLAG_IS_AVOIDING_BLOCKS = 87;
+    public static final int DATA_FLAG_FACING_TARGET_TO_RANGE_ATTACK = 88;
+    public static final int DATA_FLAG_HIDDEN_WHEN_INVISIBLE = 89;
+    public static final int DATA_FLAG_IS_IN_UI = 90;
+    public static final int DATA_FLAG_STALKING = 91;
+    public static final int DATA_FLAG_EMOTING = 92;
+    public static final int DATA_FLAG_CELEBRATING = 93;
+    public static final int DATA_FLAG_ADMIRING = 94;
+    public static final int DATA_FLAG_CELEBRATING_SPECIAL = 95;
+    public static final int DATA_FLAG_OUT_OF_CONTROL = 96;
+    public static final int DATA_FLAG_RAM_ATTACK = 97;
+    public static final int DATA_FLAG_PLAYING_DEAD = 98;
+    public static final int DATA_FLAG_IN_ASCENDABLE_BLOCK = 99;
+    public static final int DATA_FLAG_OVER_DESCENDABLE_BLOCK = 100;
+    public static final int DATA_FLAG_CROAKING = 101;
+    public static final int DATA_FLAG_EAT_MOB = 102;
+    public static final int DATA_FLAG_JUMP_GOAL_JUMP = 103;
+    public static final int DATA_FLAG_EMERGING = 104;
+    public static final int DATA_FLAG_SNIFFING = 105;
+    public static final int DATA_FLAG_DIGGING = 106;
+    public static final int DATA_FLAG_SONIC_BOOM = 107;
+    public static final int DATA_FLAG_HAS_DASH_COOLDOWN = 108;
+    public static final int DATA_FLAG_PUSH_TOWARDS_CLOSEST_SPACE = 109;
+    public static final int DATA_FLAG_SCENTING = 110;
+    public static final int DATA_FLAG_RISING = 111;
+    public static final int DATA_FLAG_FEELING_HAPPY = 112;
+    public static final int DATA_FLAG_SEARCHING = 113;
+    public static final int DATA_FLAG_CRAWLING = 114;
 
     public static long entityCount = 1;
 
@@ -389,7 +408,7 @@ public abstract class Entity extends Location implements Metadatable {
 
     protected Timing timing;
 
-    protected boolean isPlayer = false;
+    protected boolean isPlayer = this instanceof Player;
 
     private volatile boolean initialized;
 
@@ -483,7 +502,6 @@ public abstract class Entity extends Location implements Metadatable {
 
         this.timing = Timings.getEntityTiming(this);
 
-        this.isPlayer = this instanceof Player;
         this.temporalVector = new Vector3();
 
         this.id = Entity.entityCount++;
@@ -1121,16 +1139,15 @@ public abstract class Entity extends Location implements Metadatable {
             if (source.getCause() != DamageCause.VOID && source.getCause() != DamageCause.SUICIDE) {
                 Player p = (Player) this;
                 boolean totem = false;
+                boolean isOffhand = false;
                 if (p.getOffhandInventory().getItem(0).getId() == ItemID.TOTEM) {
-                    p.getOffhandInventory().clear(0);
                     totem = true;
+                    isOffhand = true;
                 } else if (p.getInventory().getItemInHand().getId() == ItemID.TOTEM) {
-                    p.getInventory().clear(p.getInventory().getHeldItemIndex());
                     totem = true;
                 }
                 if (totem) {
                     this.getLevel().addLevelEvent(this, LevelEventPacket.EVENT_SOUND_TOTEM);
-                    this.getLevel().addParticleEffect(this, ParticleEffect.TOTEM);
 
                     this.extinguish();
                     this.removeAllEffects();
@@ -1144,6 +1161,12 @@ public abstract class Entity extends Location implements Metadatable {
                     pk.eid = this.getId();
                     pk.event = EntityEventPacket.CONSUME_TOTEM;
                     p.dataPacket(pk);
+
+                    if (isOffhand) {
+                        p.getOffhandInventory().clear(0);
+                    } else {
+                        p.getInventory().clear(p.getInventory().getHeldItemIndex());
+                    }
 
                     source.setCancelled(true);
                     return false;
@@ -1452,7 +1475,7 @@ public abstract class Entity extends Location implements Metadatable {
             this.lastHeadYaw = this.headYaw;
 
             // If you want to achieve headYaw in movement. You can override it by yourself. Changing would break some mob plugins.
-            this.addMovement(this.x, this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.yaw);
+            this.addMovement(this.x, this.isPlayer ? this.y : this.y + this.getBaseOffset(), this.z, this.yaw, this.pitch, this.yaw);
         }
 
         if (diffMotion > 0.0025 || (diffMotion > 0.0001 && this.getMotion().lengthSquared() <= 0.0001)) { //0.05 ** 2
@@ -2290,7 +2313,7 @@ public abstract class Entity extends Location implements Metadatable {
         Location from = this.getLocation();
         Location to = location;
         if (cause != null) {
-            EntityTeleportEvent ev = new EntityTeleportEvent(this, from, to);
+            EntityTeleportEvent ev = new EntityTeleportEvent(this, from, to, cause);
             this.server.getPluginManager().callEvent(ev);
             if (ev.isCancelled()) {
                 return false;
@@ -2501,5 +2524,12 @@ public abstract class Entity extends Location implements Metadatable {
         int hash = 7;
         hash = (int) (29 * hash + this.getId());
         return hash;
+    }
+
+    public void playAnimation(String animation) {
+        AnimateEntityPacket animateEntityPacket = new AnimateEntityPacket();
+        animateEntityPacket.animation = animation;
+        animateEntityPacket.runtimeEntityIds.add(this.id);
+        Server.broadcastPacket(this.hasSpawned.values(), animateEntityPacket);
     }
 }

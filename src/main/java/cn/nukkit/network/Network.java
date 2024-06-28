@@ -50,7 +50,7 @@ public class Network {
     public static final byte CHANNEL_TEXT = 7; //Chat and other text stuff
     public static final byte CHANNEL_END = 31;
 
-    private Class<? extends DataPacket>[] packetPool = new Class[256];
+    private Class<? extends DataPacket>[] packetPool = new Class[1024];
 
     private final Server server;
 
@@ -94,7 +94,7 @@ public class Network {
     public static byte[] deflateRaw(byte[] data, int level) throws IOException {
         Deflater deflater = DEFLATER_RAW.get();
         try {
-            deflater.setLevel(level);
+            deflater.setLevel(data.length < Server.getInstance().networkCompressionThreshold ? 0 : level);
             deflater.setInput(data);
             deflater.finish();
             FastByteArrayOutputStream bos = ThreadCache.fbaos.get();
@@ -215,7 +215,11 @@ public class Network {
     }
 
     public void registerPacket(byte id, Class<? extends DataPacket> clazz) {
-        this.packetPool[id & 0xff] = clazz;
+        this.registerPacket(id & 0xff, clazz);
+    }
+
+    public void registerPacket(int id, Class<? extends DataPacket> clazz) {
+        this.packetPool[id & 0x3ff] = clazz;
     }
 
     public Server getServer() {
@@ -225,18 +229,17 @@ public class Network {
     public void processBatch(BatchPacket packet, Player player) {
         List<DataPacket> packets = new ObjectArrayList<>();
         try {
-            processBatch(packet.payload, packets);
+            this.processBatch(packet.payload, packets, player.getNetworkSession().getCompression());
         } catch (ProtocolException e) {
             player.close("", e.getMessage());
             log.error("Unable to process player packets ", e);
         }
     }
 
-    public void processBatch(byte[] payload, Collection<DataPacket> packets) throws ProtocolException {
+    public void processBatch(byte[] payload, Collection<DataPacket> packets, CompressionProvider compression) throws ProtocolException {
         byte[] data;
         try {
-            data = Network.inflateRaw(payload);
-            //data = Zlib.inflate(packet.payload, 2 * 1024 * 1024); // Max 2MB
+            data = compression.decompress(payload);
         } catch (Exception e) {
             log.debug("Exception while inflating batch packet", e);
             return;
@@ -247,7 +250,7 @@ public class Network {
             int count = 0;
             while (!stream.feof()) {
                 count++;
-                if (count >= 1000) {
+                if (count >= 1300) {
                     throw new ProtocolException("Illegal batch with " + count + " packets");
                 }
                 byte[] buf = stream.getByteArray();
@@ -333,7 +336,7 @@ public class Network {
     }
 
     private void registerPackets() {
-        this.packetPool = new Class[256];
+        this.packetPool = new Class[1024];
 
         this.registerPacket(ProtocolInfo.ADD_ENTITY_PACKET, AddEntityPacket.class);
         this.registerPacket(ProtocolInfo.ADD_ITEM_ENTITY_PACKET, AddItemEntityPacket.class);
@@ -435,7 +438,9 @@ public class Network {
         this.registerPacket(ProtocolInfo.EMOTE_PACKET, EmotePacket.class);
         this.registerPacket(ProtocolInfo.ON_SCREEN_TEXTURE_ANIMATION_PACKET, OnScreenTextureAnimationPacket.class);
         this.registerPacket(ProtocolInfo.COMPLETED_USING_ITEM_PACKET, CompletedUsingItemPacket.class);
+        this.registerPacket(ProtocolInfo.NETWORK_SETTINGS_PACKET, NetworkSettingsPacket.class);
         this.registerPacket(ProtocolInfo.CODE_BUILDER_PACKET, CodeBuilderPacket.class);
+        this.registerPacket(ProtocolInfo.PLAYER_AUTH_INPUT_PACKET, PlayerAuthInputPacket.class);
         this.registerPacket(ProtocolInfo.CREATIVE_CONTENT_PACKET, CreativeContentPacket.class);
         this.registerPacket(ProtocolInfo.DEBUG_INFO_PACKET, DebugInfoPacket.class);
         this.registerPacket(ProtocolInfo.EMOTE_LIST_PACKET, EmoteListPacket.class);
@@ -443,6 +448,12 @@ public class Network {
         this.registerPacket(ProtocolInfo.PLAYER_ARMOR_DAMAGE_PACKET, PlayerArmorDamagePacket.class);
         this.registerPacket(ProtocolInfo.PLAYER_ENCHANT_OPTIONS_PACKET, PlayerEnchantOptionsPacket.class);
         this.registerPacket(ProtocolInfo.UPDATE_PLAYER_GAME_TYPE_PACKET, UpdatePlayerGameTypePacket.class);
+        this.registerPacket(ProtocolInfo.UPDATE_ABILITIES_PACKET, UpdateAbilitiesPacket.class);
+        this.registerPacket(ProtocolInfo.REQUEST_ABILITY_PACKET, RequestAbilityPacket.class);
+        this.registerPacket(ProtocolInfo.UPDATE_ADVENTURE_SETTINGS_PACKET, UpdateAdventureSettingsPacket.class);
         this.registerPacket(ProtocolInfo.FILTER_TEXT_PACKET, FilterTextPacket.class);
+        this.registerPacket(ProtocolInfo.TOAST_REQUEST_PACKET, ToastRequestPacket.class);
+        this.registerPacket(ProtocolInfo.REQUEST_NETWORK_SETTINGS_PACKET, RequestNetworkSettingsPacket.class);
+        this.registerPacket(ProtocolInfo.CLIENT_TO_SERVER_HANDSHAKE_PACKET, ClientToServerHandshakePacket.class);
     }
 }
