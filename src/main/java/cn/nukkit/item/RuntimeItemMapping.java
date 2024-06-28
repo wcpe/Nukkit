@@ -1,8 +1,9 @@
 package cn.nukkit.item;
 
-import cn.nukkit.item.RuntimeItems.MappingEntry;
 import cn.nukkit.Server;
+import cn.nukkit.item.RuntimeItems.MappingEntry;
 import cn.nukkit.utils.BinaryStream;
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -72,7 +73,19 @@ public class RuntimeItemMapping {
         this.generatePalette();
     }
 
-    private void generatePalette() {
+    public void registerItem(String identifier, int legacyId, int damage) {
+        int fullId = this.getFullId(legacyId, damage);
+        Preconditions.checkState(!this.runtime2Legacy.containsKey(legacyId), "Duplicate legacyId: " + legacyId);
+        Preconditions.checkState(!this.legacy2Runtime.containsKey(fullId), "Duplicate legacyId: " + legacyId);
+        Preconditions.checkState(!this.identifier2Legacy.containsKey(identifier), "Duplicate identifier: " + identifier);
+        boolean hasDamage = damage != 0;
+        LegacyEntry legacyEntry = new LegacyEntry(legacyId, hasDamage, damage);
+        this.runtime2Legacy.put(legacyId, legacyEntry);
+        this.identifier2Legacy.put(identifier, legacyEntry);
+        this.legacy2Runtime.put(fullId, new RuntimeEntry(identifier, legacyId, hasDamage));
+    }
+
+    public void generatePalette() {
         BinaryStream paletteBuffer = new BinaryStream();
         paletteBuffer.putUnsignedVarInt(this.legacy2Runtime.size());
         for (RuntimeEntry entry : this.legacy2Runtime.values()) {
