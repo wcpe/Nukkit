@@ -1,12 +1,18 @@
 package cn.nukkit.item;
 
-import cn.nukkit.utils.Utils;
-import com.google.gson.JsonElement;
+import cn.nukkit.item.RuntimeItemMapping.LegacyEntry;
+import cn.nukkit.Server;
+import cn.nukkit.level.GlobalBlockPalette;
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import lombok.Data;
 import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,11 +21,7 @@ import java.util.Map;
 public class RuntimeItems {
 
     private static final Map<String, Integer> legacyString2LegacyInt = new HashMap<>();
-    private static final Map<Integer, String> legacyInt2LegacyString = new HashMap<>();
-    private static final Map<String, MappingEntry> latestIdentifierMapping = new HashMap<>();
-
-    private static RuntimeItemMapping mapping;
-
+    private static RuntimeItemMapping itemPalette;
     private static boolean initialized;
 
     public static void init() {
@@ -27,76 +29,99 @@ public class RuntimeItems {
             throw new IllegalStateException("RuntimeItems were already generated!");
         }
         initialized = true;
-        log.debug("Loading runtime items...");
+        log.info("Loading runtime items...");
 
-        JsonObject json = Utils.loadJsonResource("legacy_item_ids.json").getAsJsonObject();
-        for (Map.Entry<String, JsonElement> identifierToId : json.entrySet()) {
-            int legacyId = identifierToId.getValue().getAsInt();
-            legacyString2LegacyInt.put(identifierToId.getKey(), legacyId);
-            legacyInt2LegacyString.put(legacyId, identifierToId.getKey());
+        InputStream itemIdsStream = Server.class.getClassLoader().getResourceAsStream("legacy_item_ids.json");
+        if (itemIdsStream == null) {
+            throw new AssertionError("Unable to load legacy_item_ids.json");
         }
 
-        JsonObject itemMapping = Utils.loadJsonResource("item_mappings.json").getAsJsonObject();
-        Map<String, MappingEntry> mappingEntries = latestIdentifierMapping; // keep it same with master
-        Map<String, MappingEntry> mappingEntriesLegacy = new HashMap<>();
+        JsonObject json = JsonParser.parseReader(new InputStreamReader(itemIdsStream)).getAsJsonObject();
+        for (String identifier : json.keySet()) {
+            legacyString2LegacyInt.put(identifier, json.get(identifier).getAsInt());
+        }
+
+        InputStream mappingStream = Server.class.getClassLoader().getResourceAsStream("item_mappings.json");
+        if (mappingStream == null) {
+            throw new AssertionError("Unable to load item_mappings.json");
+        }
+        JsonObject itemMapping = JsonParser.parseReader(new InputStreamReader(mappingStream)).getAsJsonObject();
+
+        Map<String, MappingEntry> mappingEntries = new HashMap<>();
         for (String legacyName : itemMapping.keySet()) {
             JsonObject convertData = itemMapping.getAsJsonObject(legacyName);
-            boolean isLegacyStone = "minecraft:stone".equals(legacyName);
-
             for (String damageStr : convertData.keySet()) {
                 String identifier = convertData.get(damageStr).getAsString();
                 int damage = Integer.parseInt(damageStr);
                 mappingEntries.put(identifier, new MappingEntry(legacyName, damage));
-
-                if (!isLegacyStone) {
-                    mappingEntriesLegacy.put(identifier, new MappingEntry(legacyName, damage));
-                }
             }
         }
+        itemPalette = new RuntimeItemMapping(mappingEntries);
+    }
 
-        mapping = new RuntimeItemMapping(mappingEntries);
+    public static Item parseCreativeItem(JsonObject json, boolean ignoreUnknown) {
+        String identifier = json.get("id").getAsString();
+        LegacyEntry legacyEntry = itemPalette.fromIdentifier(identifier);
+        if (legacyEntry == null) {
+            if (!ignoreUnknown) {
+                throw new IllegalStateException("Can not find legacyEntry for " + identifier);
+            }
+            log.debug("Can not find legacyEntry for " + identifier);
+            return null;
+        }
+
+        byte[] nbtBytes;
+        if (json.has("nbt_b64")) {
+            nbtBytes = Base64.getDecoder().decode(json.get("nbt_b64").getAsString());
+        } else {
+            nbtBytes = new byte[0];
+        }
+
+        int legacyId = legacyEntry.getLegacyId();
+        int damage = 0;
+        if (json.has("damage")) {
+            damage = json.get("damage").getAsInt();
+        } else if (legacyEntry.isHasDamage()) {
+            damage = legacyEntry.getDamage();
+        } else if (json.has("blockRuntimeId")) {
+            int runtimeId = json.get("blockRuntimeId").getAsInt();
+            int fullId = GlobalBlockPalette.getLegacyFullId(runtimeId);
+            if (fullId == -1) {
+                if (ignoreUnknown) {
+                    return null;
+                } else {
+                    throw new IllegalStateException("Can not find blockRuntimeId for " + runtimeId);
+                }
+            }
+
+            damage = fullId & 0xf;
+        }
+
+        int count = json.has("count") ? json.get("count").getAsInt() : 1;
+        return Item.get(legacyId, damage, count, nbtBytes);
     }
 
     public static RuntimeItemMapping getMapping() {
-        return mapping;
+        return itemPalette;
     }
 
     public static int getLegacyIdFromLegacyString(String identifier) {
         return legacyString2LegacyInt.getOrDefault(identifier, -1);
     }
-
-    public static String getLegacyStringFromLegacyId(int legacyId) {
-        return legacyInt2LegacyString.getOrDefault(legacyId, "minecraft:info_update");
-    }
-
-    public static String getLegacyStringFromNew(String identifier) {
-        MappingEntry entry = latestIdentifierMapping.get(identifier);
-        return entry == null ? identifier : entry.getLegacyName();
+    public static void registerCustomItem(String nameId, int legacyId, int damage, Class<? extends Item> itemClass) {
+        Preconditions.checkNotNull(nameId, "nameId");
+        Preconditions.checkNotNull(itemClass, "itemClass");
+        Preconditions.checkArgument(legacyId > 0 && legacyId < 65535, "Invalid legacyId: " + legacyId);
+        Preconditions.checkArgument(!nameId.startsWith("minecraft:"), "Invalid identifier: " + nameId);
+        Preconditions.checkArgument(nameId.indexOf(58) != -1, "Invalid namespace: " + nameId);
+        itemPalette.registerItem(nameId, legacyId, damage);
+        itemPalette.generatePalette();
+        Item.list[legacyId] = itemClass;
     }
 
     @Data
     public static class MappingEntry {
         private final String legacyName;
         private final int damage;
-    }
-
-    public static int getId(int fullId) {
-        return (short) (fullId >> 16);
-    }
-
-    public static int getData(int fullId) {
-        return ((fullId >> 1) & 0x7fff);
-    }
-
-    public static int getFullId(int id, int data) {
-        return (((short) id) << 16) | ((data & 0x7fff) << 1);
-    }
-
-    public static int getNetworkId(int networkFullId) {
-        return networkFullId >> 1;
-    }
-
-    public static boolean hasData(int id) {
-        return (id & 0x1) != 0;
     }
 }
