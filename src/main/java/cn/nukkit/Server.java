@@ -94,6 +94,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -196,6 +197,8 @@ public class Server {
     private PlayerDataSerializer playerDataSerializer;
     private final BatchingHelper batchingHelper;
     private final Set<String> ignoredPackets = new HashSet<>();
+
+    public Queue<Runnable> processQueue = new ConcurrentLinkedQueue<Runnable>();
 
     /**
      * The server's MOTD. Remember to call network.setName() when updated.
@@ -1199,6 +1202,13 @@ public class Server {
         }
 
         this.scheduler.mainThreadHeartbeat(this.tickCounter);
+
+
+        // Timings.processQueueTimer.startTiming();
+        while (!processQueue.isEmpty()) {
+            processQueue.remove().run();
+        }
+        // Timings.processQueueTimer.stopTiming();
 
         this.checkTickUpdates(this.tickCounter);
 
