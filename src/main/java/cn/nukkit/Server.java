@@ -100,6 +100,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
@@ -244,6 +245,8 @@ public class Server {
 
     private final Set<String> ignoredPackets = new HashSet<>();
 
+    public Queue<Runnable> processQueue = new ConcurrentLinkedQueue<Runnable>();
+
     Server(final String filePath, String dataPath, String pluginPath, String predefinedLanguage) {
         Preconditions.checkState(instance == null, "Already initialized!");
         currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
@@ -302,7 +305,7 @@ public class Server {
                 InputStream conf = this.getClass().getClassLoader().getResourceAsStream("lang/" + lang + "/lang.ini");
                 if (conf != null) {
                     language = lang;
-                } else if(predefinedLanguage != null) {
+                } else if (predefinedLanguage != null) {
                     log.warn("No language found for predefined language: " + predefinedLanguage + ", please choose a valid language");
                     predefinedLanguage = null;
                 }
@@ -1052,11 +1055,11 @@ public class Server {
         pk.type = PlayerListPacket.TYPE_ADD;
         pk.entries = this.playerList.values().stream()
                 .map(p -> new PlayerListPacket.Entry(
-                p.getUniqueId(),
-                p.getId(),
-                p.getDisplayName(),
-                p.getSkin(),
-                p.getLoginChainData().getXUID()))
+                        p.getUniqueId(),
+                        p.getId(),
+                        p.getDisplayName(),
+                        p.getSkin(),
+                        p.getLoginChainData().getXUID()))
                 .toArray(PlayerListPacket.Entry[]::new);
 
         player.dataPacket(pk);
@@ -1169,6 +1172,12 @@ public class Server {
         Timings.schedulerTimer.startTiming();
         this.scheduler.mainThreadHeartbeat(this.tickCounter);
         Timings.schedulerTimer.stopTiming();
+
+        Timings.processQueueTimer.startTiming();
+        while (!processQueue.isEmpty()) {
+            processQueue.remove().run();
+        }
+        Timings.processQueueTimer.stopTiming();
 
         this.checkTickUpdates(this.tickCounter, tickTime);
 
@@ -1732,7 +1741,7 @@ public class Server {
                 //doing it like this ensures that the playerdata will be saved in a server shutdown
                 @Override
                 public void onCancel() {
-                    if (!this.hasRun)    {
+                    if (!this.hasRun) {
                         this.hasRun = true;
                         saveOfflinePlayerDataInternal(event.getSerializer(), tag, nameLower, event.getUuid().orElse(null));
                     }

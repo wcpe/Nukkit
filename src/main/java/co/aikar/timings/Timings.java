@@ -56,6 +56,8 @@ public final class Timings {
     public static final Timing timingsTickTimer;
     public static final Timing pluginEventTimer;
 
+    public static final Timing processQueueTimer;
+
     public static final Timing connectionTimer;
     public static final Timing schedulerTimer;
     public static final Timing schedulerAsyncTimer;
@@ -101,6 +103,8 @@ public final class Timings {
         fullServerTickTimer = new FullServerTickTiming();
         timingsTickTimer = TimingsManager.getTiming(DEFAULT_GROUP.name, "Timings Tick", fullServerTickTimer);
         pluginEventTimer = TimingsManager.getTiming("Plugin Events");
+
+        processQueueTimer = TimingsManager.getTiming("processQueue");
 
         connectionTimer = TimingsManager.getTiming("Connection Handler");
         schedulerTimer = TimingsManager.getTiming("Scheduler");

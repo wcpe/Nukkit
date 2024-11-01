@@ -1,15 +1,16 @@
 package cn.nukkit.console;
 
 import cn.nukkit.Server;
+import cn.nukkit.utils.LogLevel;
+import cn.nukkit.utils.WaitRunnable;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.jline.reader.Candidate;
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
 import org.jline.reader.ParsedLine;
 
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 @RequiredArgsConstructor
@@ -18,31 +19,27 @@ public class NukkitConsoleCompleter implements Completer {
 
     @Override
     public void complete(LineReader lineReader, ParsedLine parsedLine, List<Candidate> candidates) {
-        if (parsedLine.wordIndex() == 0) {
-            if (parsedLine.word().isEmpty()) {
-                addCandidates(s -> candidates.add(new Candidate(s)));
+        val line = parsedLine.line();
+        WaitRunnable<List<String>> waitRunnable = new WaitRunnable<List<String>>() {
+            @Override
+            protected List<String> evaluate() {
+                return server.getCommandMap().tabComplete(server.getConsoleSender(), line);
+            }
+        };
+        server.processQueue.add(waitRunnable);
+        try {
+            List<String> offers = waitRunnable.get();
+            if (offers == null) {
                 return;
             }
-            SortedSet<String> names = new TreeSet<>();
-            addCandidates(names::add);
-            for (String match : names) {
-                if (!match.toLowerCase().startsWith(parsedLine.word())) {
-                    continue;
-                }
-
-                candidates.add(new Candidate(match));
+            for (String offer : offers) {
+                candidates.add(new Candidate(offer));
             }
-        } else if (parsedLine.wordIndex() > 0 && !parsedLine.word().isEmpty()) {
-            String word = parsedLine.word();
-            SortedSet<String> names = new TreeSet<>();
-            server.getOnlinePlayers().values().forEach((p) -> names.add(p.getName()));
-            for (String match : names) {
-                if (!match.toLowerCase().startsWith(word.toLowerCase())) {
-                    continue;
-                }
 
-                candidates.add(new Candidate(match));
-            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            this.server.getLogger().log(LogLevel.WARNING, "Tab 补全时出现异常", e);
         }
     }
 
