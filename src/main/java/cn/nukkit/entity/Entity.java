@@ -54,7 +54,7 @@ import static cn.nukkit.network.protocol.SetEntityLinkPacket.*;
  * @author MagicDroidX
  */
 public abstract class Entity extends Location implements Metadatable {
-
+    public static final Entity[] EMPTY_ARRAY = new Entity[0];
     public static final int NETWORK_ID = -1;
 
     public abstract int getNetworkId();

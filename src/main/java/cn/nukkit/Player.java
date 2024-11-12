@@ -10,6 +10,10 @@ import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandDataVersions;
 import cn.nukkit.entity.*;
+import cn.nukkit.entity.data.IntPositionEntityData;
+import cn.nukkit.entity.data.ShortEntityData;
+import cn.nukkit.entity.data.Skin;
+import cn.nukkit.entity.data.StringEntityData;
 import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.data.*;
 import cn.nukkit.entity.item.*;
@@ -108,7 +112,13 @@ import java.util.stream.Stream;
  */
 @Log4j2
 public class Player extends EntityHuman implements CommandSender, InventoryHolder, ChunkLoader, IPlayer {
-
+    /// static fields
+    /**
+     * 一个承载玩家的空数组静态常量
+     * <p>
+     * An empty array of static constants that host the player
+     */
+    public static final Player[] EMPTY_ARRAY = new Player[0];
     public static final int SURVIVAL = 0;
     public static final int CREATIVE = 1;
     public static final int ADVENTURE = 2;
@@ -415,6 +425,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     /**
      * This might disappear in the future.
      * Please use getUniqueId() instead (IP + clientId + name combo, in the future it'll change to real UUID for online auth)
+     *
      * @return random client id
      */
     @Deprecated
@@ -1254,6 +1265,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         int radius = spawned ? this.chunkRadius : server.spawnThresholdRadius;
         int radiusSqr = radius * radius;
 
+
         long index;
         for (int x = 0; x <= radius; x++) {
             int xx = x * x;
@@ -1333,6 +1345,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     /**
+     * 0 is true
+     * -1 is false
+     * other is identifer
+     *
+     * @param packet packet to send
+     * @return packet successfully sent
      * Send a data packet
      * @param packet data packet
      * @return sent
@@ -1368,6 +1386,14 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         return this.dataPacket(packet) ? 1 : 0;
     }
 
+    /**
+     * 0 is true
+     * -1 is false
+     * other is identifer
+     *
+     * @param packet packet to send
+     * @return packet successfully sent
+     */
     @Deprecated
     public boolean directDataPacket(DataPacket packet) {
         return this.dataPacket(packet);
@@ -1874,9 +1900,25 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
      * Internal: Check nearby entities and try to pick them up
      */
     protected void checkNearEntities() {
-        Entity[] e = this.level.getNearbyEntities(this.boundingBox.grow(1, 0.5, 1), this);
-        for (Entity entity : e) {
-            if (!entity.isAlive()) {
+        for (Entity entity : this.level.getNearbyEntities(this.boundingBox.grow(1, 0.5, 1), this)) {
+            /*  修复一个空指针问题
+                [main] ERROR - 更新世界 "world" 时出现错误：java.lang.NullPointerException
+                at cn.nukkit.Player.checkNearEntities(Player.java:1434)
+                at cn.nukkit.Player.onUpdate(Player.java:1689)
+                at cn.nukkit.level.Level.doTick(Level.java:831)
+                at cn.nukkit.Server.checkTickUpdates(Server.java:1094)
+                at cn.nukkit.Server.tick(Server.java:1182)
+                at cn.nukkit.Server.tickProcessor(Server.java:943)
+                at cn.nukkit.Server.start(Server.java:911)
+                at cn.nukkit.Server.<init>(Server.java:592)
+                at cn.nukkit.Nukkit.main(Nukkit.java:120)
+             */
+            if (entity == null) {
+                continue;
+            }
+            entity.scheduleUpdate();
+
+            if (!entity.isAlive() || !this.isAlive()) {
                 continue;
             }
 
@@ -4942,6 +4984,9 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     /**
      * Sends a chat message as this player
      *
+     * Sends a chat message as this player. If the message begins with a / (forward-slash) it will be treated
+     * as a command.
+     *
      * @param message message to send
      * @return successful
      */
@@ -6191,7 +6236,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
      * You can find out FormWindow result by listening to PlayerFormRespondedEvent
      *
      * @param window to show
-     * @param id form id
+     * @param id     form id
      * @return form id to use in {@link PlayerFormRespondedEvent}
      */
     public int showFormWindow(FormWindow window, int id) {
@@ -7000,6 +7045,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     /**
      * Show a window of a XBOX account's profile
+     *
      * @param xuid XUID
      */
     public void showXboxProfile(String xuid) {
@@ -7010,6 +7056,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     /**
      * Start fishing
+     *
      * @param fishingRod fishing rod item
      */
     public void startFishing(Item fishingRod) {
@@ -7044,6 +7091,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
 
     /**
      * Stop fishing
+     *
      * @param click clicked or forced
      */
     public void stopFishing(boolean click) {

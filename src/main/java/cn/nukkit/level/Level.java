@@ -60,6 +60,7 @@ import cn.nukkit.utils.*;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import lombok.var;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -2490,29 +2491,89 @@ public class Level implements ChunkManager, Metadatable, GeneratorTaskFactory {
         return this.getNearbyEntities(bb, null, false);
     }
 
+    private static Entity[] ENTITY_BUFFER = new Entity[512];
+
     public Entity[] getNearbyEntities(AxisAlignedBB bb, Entity entity) {
         return getNearbyEntities(bb, entity, false);
     }
 
     public Entity[] getNearbyEntities(AxisAlignedBB bb, Entity entity, boolean loadChunks) {
-        List<Entity> nearby = new ArrayList<>();
+        int index = 0;
 
         int minX = NukkitMath.floorDouble((bb.getMinX() - 2) * 0.0625);
         int maxX = NukkitMath.ceilDouble((bb.getMaxX() + 2) * 0.0625);
         int minZ = NukkitMath.floorDouble((bb.getMinZ() - 2) * 0.0625);
         int maxZ = NukkitMath.ceilDouble((bb.getMaxZ() + 2) * 0.0625);
 
+        ArrayList<Entity> overflow = null;
+
         for (int x = minX; x <= maxX; ++x) {
             for (int z = minZ; z <= maxZ; ++z) {
                 for (Entity ent : this.getChunkEntities(x, z, loadChunks).values()) {
-                    if (ent != entity && ent.boundingBox.intersectsWith(bb)) {
-                        nearby.add(ent);
+                    if (ent != null && ent != entity && ent.boundingBox.intersectsWith(bb)) {
+                        overflow = addEntityToBuffer(index, overflow, ent);
+                        index++;
                     }
                 }
             }
         }
 
-        return nearby.toArray(new Entity[0]);
+        return getEntitiesFromBuffer(index, overflow);
+    }
+
+    public List<Entity> fastNearbyEntities(AxisAlignedBB bb) {
+        return this.fastNearbyEntities(bb, null);
+    }
+
+    public List<Entity> fastNearbyEntities(AxisAlignedBB bb, Entity entity) {
+        return fastNearbyEntities(bb, entity, false);
+    }
+
+    public List<Entity> fastNearbyEntities(AxisAlignedBB bb, Entity entity, boolean loadChunks) {
+        int minX = NukkitMath.floorDouble((bb.getMinX() - 2) * 0.0625);
+        int maxX = NukkitMath.ceilDouble((bb.getMaxX() + 2) * 0.0625);
+        int minZ = NukkitMath.floorDouble((bb.getMinZ() - 2) * 0.0625);
+        int maxZ = NukkitMath.ceilDouble((bb.getMaxZ() + 2) * 0.0625);
+
+        var result = new ArrayList<Entity>();
+
+        for (int x = minX; x <= maxX; ++x) {
+            for (int z = minZ; z <= maxZ; ++z) {
+                for (var ent : this.getChunkEntities(x, z, loadChunks).values()) {
+                    if (ent != entity && ent.boundingBox.intersectsWith(bb)) {
+                        result.add(ent);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private ArrayList<Entity> addEntityToBuffer(int index, ArrayList<Entity> overflow, Entity ent) {
+        if (index < ENTITY_BUFFER.length) {
+            ENTITY_BUFFER[index] = ent;
+        } else {
+            if (overflow == null) overflow = new ArrayList<>(1024);
+            overflow.add(ent);
+        }
+        return overflow;
+    }
+
+    private Entity[] getEntitiesFromBuffer(int index, ArrayList<Entity> overflow) {
+        if (index == 0) return Entity.EMPTY_ARRAY;
+        Entity[] copy;
+        if (overflow == null) {
+            copy = Arrays.copyOfRange(ENTITY_BUFFER, 0, index);
+            Arrays.fill(ENTITY_BUFFER, 0, index, null);
+        } else {
+            copy = new Entity[ENTITY_BUFFER.length + overflow.size()];
+            System.arraycopy(ENTITY_BUFFER, 0, copy, 0, ENTITY_BUFFER.length);
+            for (int i = 0; i < overflow.size(); i++) {
+                copy[ENTITY_BUFFER.length + i] = overflow.get(i);
+            }
+        }
+        return copy;
     }
 
     public Map<Long, BlockEntity> getBlockEntities() {

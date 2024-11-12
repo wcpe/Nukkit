@@ -15,10 +15,13 @@ import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public class NukkitConsoleCompleter implements Completer {
+    private final Server server;
 
     @Override
     public void complete(LineReader lineReader, ParsedLine parsedLine, List<Candidate> candidates) {
         val line = parsedLine.line();
+
+
         Server server = Server.getInstance();
         WaitRunnable<List<String>> waitRunnable = new WaitRunnable<List<String>>() {
             @Override
@@ -28,7 +31,7 @@ public class NukkitConsoleCompleter implements Completer {
         };
         server.processQueue.add(waitRunnable);
         try {
-            List<String> offers = waitRunnable.get();
+            List<String> offers = server.getCommandMap().tabComplete(server.getConsoleSender(), line);
             if (offers == null) {
                 return;
             }
@@ -36,8 +39,6 @@ public class NukkitConsoleCompleter implements Completer {
                 candidates.add(new Candidate(offer));
             }
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             Server.getInstance().getLogger().log(LogLevel.WARNING, "Tab 补全时出现异常", e);
         }

@@ -777,7 +777,7 @@ public class Server {
         if (sender == null) {
             throw new ServerException("CommandSender is not valid");
         }
-
+        getLogger().info(sender.getName()+" 执行命令: " + commandLine);
         if (this.commandMap.dispatch(sender, commandLine)) {
             return true;
         }
