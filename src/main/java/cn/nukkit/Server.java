@@ -245,8 +245,6 @@ public class Server {
 
     private final Set<String> ignoredPackets = new HashSet<>();
 
-    public Queue<Runnable> processQueue = new ConcurrentLinkedQueue<Runnable>();
-
     Server(final String filePath, String dataPath, String pluginPath, String predefinedLanguage) {
         Preconditions.checkState(instance == null, "Already initialized!");
         currentThread = Thread.currentThread(); // Saves the current thread instance as a reference, used in Server#isPrimaryThread()
@@ -767,7 +765,7 @@ public class Server {
         if (sender == null) {
             throw new ServerException("CommandSender is not valid");
         }
-
+        getLogger().info(sender.getName()+" 执行命令: " + commandLine);
         if (this.commandMap.dispatch(sender, commandLine)) {
             return true;
         }
@@ -1172,12 +1170,6 @@ public class Server {
         Timings.schedulerTimer.startTiming();
         this.scheduler.mainThreadHeartbeat(this.tickCounter);
         Timings.schedulerTimer.stopTiming();
-
-        Timings.processQueueTimer.startTiming();
-        while (!processQueue.isEmpty()) {
-            processQueue.remove().run();
-        }
-        Timings.processQueueTimer.stopTiming();
 
         this.checkTickUpdates(this.tickCounter, tickTime);
 
