@@ -10,6 +10,7 @@ import cn.nukkit.utils.MainLogger;
 import cn.nukkit.utils.StringUtil;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
+import lombok.val;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -121,6 +122,17 @@ public class SimpleCommandMap implements CommandMap {
         command.register(this);
 
         return registered;
+    }
+
+    public void unregister(Command command) {
+        val name = command.getName().trim().toLowerCase();
+        knownCommands.remove(name);
+        knownCommands.remove(name + ":" + name);
+        for (String alias : command.getAliases()) {
+            val a = alias.trim().toLowerCase();
+            knownCommands.remove(a);
+            knownCommands.remove(name + ":" + a);
+        }
     }
 
     @Override
