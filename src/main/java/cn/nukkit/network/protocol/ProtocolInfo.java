@@ -220,5 +220,6 @@ public interface ProtocolInfo {
     // MC packet IDs continue from 300 (0x12c)
     // Hack: 100 is added to the IDs below on encode
     // TODO: New pid() function (int) while trying not to break too many plugins
-    byte __INTERNAL__OPEN_SIGN_PACKET = (byte) 203; // 303
+    byte __INTERNAL__OPEN_SIGN_PACKET = (byte) 0xfd; // 253
+    int OPEN_SIGN_PACKET = 303;
 }

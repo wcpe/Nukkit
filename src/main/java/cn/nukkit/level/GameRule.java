@@ -34,13 +34,12 @@ public enum GameRule {
     SHOW_BORDER_EFFECT("showBorderEffect"),
     SEND_COMMAND_FEEDBACK("sendCommandFeedback"),
     SHOW_COORDINATES("showCoordinates"),
-    SHOW_DAYS_PLAYED("showDaysPlayed"),
     SHOW_DEATH_MESSAGES("showDeathMessages"),
     SHOW_RECIPE_MESSAGES("showRecipeMessages"),
     SHOW_TAGS("showTags"),
     SPAWN_RADIUS("spawnRadius"),
     TNT_EXPLODES("tntExplodes"),
-    TNT_EXPLOSION_DROP_DECAY("tntExplosionDropDecay");
+    ;
 
     private final String name;
 

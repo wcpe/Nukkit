@@ -50,7 +50,7 @@ public class Network {
     public static final byte CHANNEL_TEXT = 7; //Chat and other text stuff
     public static final byte CHANNEL_END = 31;
 
-    private Class<? extends DataPacket>[] packetPool = new Class[512];
+    private Class<? extends DataPacket>[] packetPool = new Class[1024];
 
     private final Server server;
 
@@ -215,7 +215,11 @@ public class Network {
     }
 
     public void registerPacket(byte id, Class<? extends DataPacket> clazz) {
-        this.packetPool[id & 0xff] = clazz;
+        this.registerPacket(id & 0xff, clazz);
+    }
+
+    public void registerPacket(int id, Class<? extends DataPacket> clazz) {
+        this.packetPool[id & 0x3ff] = clazz;
     }
 
     public Server getServer() {
@@ -246,7 +250,7 @@ public class Network {
             int count = 0;
             while (!stream.feof()) {
                 count++;
-                if (count >= 1000) {
+                if (count >= 1300) {
                     throw new ProtocolException("Illegal batch with " + count + " packets");
                 }
                 byte[] buf = stream.getByteArray();
@@ -332,7 +336,7 @@ public class Network {
     }
 
     private void registerPackets() {
-        this.packetPool = new Class[512];
+        this.packetPool = new Class[1024];
 
         this.registerPacket(ProtocolInfo.ADD_ENTITY_PACKET, AddEntityPacket.class);
         this.registerPacket(ProtocolInfo.ADD_ITEM_ENTITY_PACKET, AddItemEntityPacket.class);
