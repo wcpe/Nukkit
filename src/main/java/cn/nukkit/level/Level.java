@@ -64,6 +64,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import lombok.var;
 
 import java.io.File;
 import java.io.IOException;
@@ -2274,7 +2275,7 @@ public class Level implements ChunkManager, Metadatable {
         return getNearbyEntities(bb, entity, false);
     }
 
-    public Entity[] getNearbyEntities(AxisAlignedBB bb, Entity entity, boolean loadChunks) {
+     public Entity[] getNearbyEntities(AxisAlignedBB bb, Entity entity, boolean loadChunks) {
         int index = 0;
 
         int minX = NukkitMath.floorDouble((bb.getMinX() - 2) * 0.0625);
@@ -2287,20 +2288,58 @@ public class Level implements ChunkManager, Metadatable {
         for (int x = minX; x <= maxX; ++x) {
             for (int z = minZ; z <= maxZ; ++z) {
                 for (Entity ent : this.getChunkEntities(x, z, loadChunks).values()) {
-                    if (ent != entity && ent.boundingBox.intersectsWith(bb)) {
-                        if (index < ENTITY_BUFFER.length) {
-                            ENTITY_BUFFER[index] = ent;
-                        } else {
-                            if (overflow == null) overflow = new ArrayList<>(1024);
-                            overflow.add(ent);
-                        }
+                    if (ent != null && ent != entity && ent.boundingBox.intersectsWith(bb)) {
+                        overflow = addEntityToBuffer(index, overflow, ent);
                         index++;
                     }
                 }
             }
         }
 
-        if (index == 0) return EMPTY_ENTITY_ARR;
+        return getEntitiesFromBuffer(index, overflow);
+    }
+
+    public List<Entity> fastNearbyEntities(AxisAlignedBB bb) {
+        return this.fastNearbyEntities(bb, null);
+    }
+
+    public List<Entity> fastNearbyEntities(AxisAlignedBB bb, Entity entity) {
+        return fastNearbyEntities(bb, entity, false);
+    }
+
+    public List<Entity> fastNearbyEntities(AxisAlignedBB bb, Entity entity, boolean loadChunks) {
+        int minX = NukkitMath.floorDouble((bb.getMinX() - 2) * 0.0625);
+        int maxX = NukkitMath.ceilDouble((bb.getMaxX() + 2) * 0.0625);
+        int minZ = NukkitMath.floorDouble((bb.getMinZ() - 2) * 0.0625);
+        int maxZ = NukkitMath.ceilDouble((bb.getMaxZ() + 2) * 0.0625);
+
+        var result = new ArrayList<Entity>();
+
+        for (int x = minX; x <= maxX; ++x) {
+            for (int z = minZ; z <= maxZ; ++z) {
+                for (var ent : this.getChunkEntities(x, z, loadChunks).values()) {
+                    if (ent != entity && ent.boundingBox.intersectsWith(bb)) {
+                        result.add(ent);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private ArrayList<Entity> addEntityToBuffer(int index, ArrayList<Entity> overflow, Entity ent) {
+        if (index < ENTITY_BUFFER.length) {
+            ENTITY_BUFFER[index] = ent;
+        } else {
+            if (overflow == null) overflow = new ArrayList<>(1024);
+            overflow.add(ent);
+        }
+        return overflow;
+    }
+
+    private Entity[] getEntitiesFromBuffer(int index, ArrayList<Entity> overflow) {
+        if (index == 0) return Entity.EMPTY_ARRAY;
         Entity[] copy;
         if (overflow == null) {
             copy = Arrays.copyOfRange(ENTITY_BUFFER, 0, index);

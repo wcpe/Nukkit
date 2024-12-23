@@ -121,7 +121,7 @@ public class ClientboundMapItemDataPacket extends DataPacket {
                 }
 
                 image.flush();
-            } else if (colors.length > 0) {
+            } else {
                 for (int color : colors) {
                     this.putUnsignedVarInt(color);
                 }

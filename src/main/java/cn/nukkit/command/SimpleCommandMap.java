@@ -1,17 +1,21 @@
 package cn.nukkit.command;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.command.defaults.*;
 import cn.nukkit.command.simple.*;
 import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.utils.MainLogger;
+import cn.nukkit.utils.StringUtil;
 import cn.nukkit.utils.TextFormat;
 import cn.nukkit.utils.Utils;
+import lombok.val;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
  * Nukkit Project
  */
 public class SimpleCommandMap implements CommandMap {
+    private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
     protected final Map<String, Command> knownCommands = new HashMap<>();
 
     private final Server server;
@@ -117,6 +122,17 @@ public class SimpleCommandMap implements CommandMap {
         command.register(this);
 
         return registered;
+    }
+
+    public void unregister(Command command) {
+        val name = command.getName().trim().toLowerCase();
+        knownCommands.remove(name);
+        knownCommands.remove(name + ":" + name);
+        for (String alias : command.getAliases()) {
+            val a = alias.trim().toLowerCase();
+            knownCommands.remove(a);
+            knownCommands.remove(name + ":" + a);
+        }
     }
 
     @Override
@@ -285,6 +301,51 @@ public class SimpleCommandMap implements CommandMap {
         }
         return null;
     }
+
+    public List<String> tabComplete(CommandSender sender, String cmdLine) {
+        int spaceIndex = cmdLine.indexOf(' ');
+
+        if (spaceIndex == -1) {
+            ArrayList<String> completions = new ArrayList<>();
+            Map<String, Command> knownCommands = this.knownCommands;
+
+            final String prefix = (sender instanceof Player ? "/" : "");
+
+            for (Map.Entry<String, Command> commandEntry : knownCommands.entrySet()) {
+                Command command = commandEntry.getValue();
+
+                if (!command.testPermissionSilent(sender)) {
+                    continue;
+                }
+
+                String name = commandEntry.getKey(); // Use the alias, not command name
+
+                if (StringUtil.startsWithIgnoreCase(name, cmdLine)) {
+                    completions.add(prefix + name);
+                }
+            }
+
+            completions.sort(String.CASE_INSENSITIVE_ORDER);
+            return completions;
+        }
+
+        String commandName = cmdLine.substring(0, spaceIndex);
+        Command target = getCommand(commandName);
+
+        if (target == null) {
+            return null;
+        }
+
+        if (!target.testPermissionSilent(sender)) {
+            return null;
+        }
+
+        String argLine = cmdLine.substring(spaceIndex + 1);
+        String[] args = PATTERN_ON_SPACE.split(argLine, -1);
+
+        return target.tabComplete(sender, commandName, args);
+    }
+
 
     public Map<String, Command> getCommands() {
         return knownCommands;

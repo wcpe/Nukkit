@@ -6,9 +6,11 @@ import cn.nukkit.command.data.*;
 import cn.nukkit.lang.TextContainer;
 import cn.nukkit.lang.TranslationContainer;
 import cn.nukkit.permission.Permissible;
+import cn.nukkit.utils.StringUtil;
 import cn.nukkit.utils.TextFormat;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
+import com.google.common.collect.ImmutableList;
 
 import java.util.*;
 
@@ -136,6 +138,38 @@ public abstract class Command {
     }
 
     public abstract boolean execute(CommandSender sender, String commandLabel, String[] args);
+
+
+    /**
+     * 在命令的制表符补全时执行，返回玩家可以制表切换的选项列表。
+     *
+     * @param sender 执行此命令的源对象
+     * @param alias  使用的别名
+     * @param args   传递给命令的所有参数，通过 ' ' 分隔
+     * @return 指定参数的制表补全列表。此列表永远不会为 null，可能是不可变的。
+     */
+    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+
+        if (args.length == 0) {
+            return ImmutableList.of();
+        }
+
+        String lastWord = args[args.length - 1];
+
+        Player senderPlayer = sender instanceof Player ? (Player) sender : null;
+
+        ArrayList<String> matchedPlayers = new ArrayList<>();
+        for (Player player : sender.getServer().getOnlinePlayers().values()) {
+            String name = player.getName();
+            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
+                matchedPlayers.add(name);
+            }
+        }
+
+        matchedPlayers.sort(String.CASE_INSENSITIVE_ORDER);
+        return matchedPlayers;
+    }
+
 
     public String getName() {
         return name;

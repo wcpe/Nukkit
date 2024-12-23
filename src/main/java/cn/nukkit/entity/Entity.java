@@ -45,7 +45,7 @@ import static cn.nukkit.network.protocol.SetEntityLinkPacket.*;
  * @author MagicDroidX
  */
 public abstract class Entity extends Location implements Metadatable {
-
+    public static final Entity[] EMPTY_ARRAY = new Entity[0];
     public static final int NETWORK_ID = -1;
 
     public abstract int getNetworkId();
@@ -2443,7 +2443,7 @@ public abstract class Entity extends Location implements Metadatable {
             if (data.getId() == DATA_FLAGS_EXTENDED) {
                 metadata.put(this.dataProperties.get(DATA_FLAGS));
             }
-            this.sendData(this.hasSpawned.values().toArray(new Player[0]), metadata);
+            this.sendData(this.hasSpawned.values().toArray(Player.EMPTY_ARRAY), metadata);
         }
         return true;
     }

@@ -11,6 +11,7 @@ import cn.nukkit.utils.PluginException;
 import cn.nukkit.utils.Utils;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
+import lombok.val;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -223,9 +224,7 @@ public class PluginManager {
                             }
                         }
                     } catch (Exception e) {
-                        this.server.getLogger().error(this.server.getLanguage().translateString("nukkit.plugin" +
-                                ".fileError", file.getName(), dictionary.toString(), Utils
-                                .getExceptionMessage(e)));
+                        this.server.getLogger().error(this.server.getLanguage().translateString("nukkit.plugin" + ".fileError", file.getName(), dictionary.toString(), Utils.getExceptionMessage(e)));
                         MainLogger logger = this.server.getLogger();
                         if (logger != null) {
                             logger.logException(e);
@@ -243,8 +242,7 @@ public class PluginManager {
                             if (loadedPlugins.containsKey(dependency) || this.getPlugin(dependency) != null) {
                                 dependencies.get(name).remove(dependency);
                             } else if (!plugins.containsKey(dependency)) {
-                                this.server.getLogger().critical(this.server.getLanguage().translateString("nukkit" +
-                                        ".plugin.loadError", new String[]{name, "%nukkit.plugin.unknownDependency"}) + ": " + dependency);
+                                this.server.getLogger().critical(this.server.getLanguage().translateString("nukkit" + ".plugin.loadError", new String[]{name, "%nukkit.plugin.unknownDependency"}) + ": " + dependency);
                                 break;
                             }
                         }
@@ -255,8 +253,7 @@ public class PluginManager {
                     }
 
                     if (softDependencies.containsKey(name)) {
-                        softDependencies.get(name).removeIf(dependency ->
-                                loadedPlugins.containsKey(dependency) || this.getPlugin(dependency) != null);
+                        softDependencies.get(name).removeIf(dependency -> loadedPlugins.containsKey(dependency) || this.getPlugin(dependency) != null);
 
                         if (softDependencies.get(name).isEmpty()) {
                             softDependencies.remove(name);
@@ -615,6 +612,42 @@ public class PluginManager {
         }
     }
 
+
+    /**
+     * 注册单个事件监听
+     *
+     * @param event           事件 Class 类
+     * @param listener        监听者实例
+     * @param priority        优先级
+     * @param executor        执行器
+     * @param plugin          插件示例
+     * @param ignoreCancelled 是否忽略取消
+     * @return RegisteredListener
+     */
+    public RegisteredListener registerSingleEvent(Class<? extends Event> event, Listener listener, EventPriority priority, EventExecutor executor, Plugin plugin, boolean ignoreCancelled) throws PluginException {
+        if (!plugin.isEnabled()) {
+            throw new PluginException("Plugin attempted to register " + event + " while not enabled");
+        }
+        try {
+            Timing timing = Timings.getPluginEventTiming(event, listener, executor, plugin);
+            val registerListener = new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled, timing);
+            this.getEventListeners(event).register(registerListener);
+            return registerListener;
+        } catch (IllegalAccessException e) {
+            Server.getInstance().getLogger().logException(e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取事件处理器列表
+     *
+     * @param type 事件类型
+     */
+    public HandlerList getHandlerList(Class<? extends Event> type) throws IllegalAccessException {
+        return getEventListeners(type);
+    }
+
     private HandlerList getEventListeners(Class<? extends Event> type) throws IllegalAccessException {
         try {
             Method method = getRegistrationClass(type).getDeclaredMethod("getHandlers");
@@ -632,9 +665,7 @@ public class PluginManager {
             clazz.getDeclaredMethod("getHandlers");
             return clazz;
         } catch (NoSuchMethodException e) {
-            if (clazz.getSuperclass() != null
-                    && !clazz.getSuperclass().equals(Event.class)
-                    && Event.class.isAssignableFrom(clazz.getSuperclass())) {
+            if (clazz.getSuperclass() != null && !clazz.getSuperclass().equals(Event.class) && Event.class.isAssignableFrom(clazz.getSuperclass())) {
                 return getRegistrationClass(clazz.getSuperclass().asSubclass(Event.class));
             } else {
                 throw new IllegalAccessException("Unable to find handler list for event " + clazz.getName() + ". Static getHandlers method required!");

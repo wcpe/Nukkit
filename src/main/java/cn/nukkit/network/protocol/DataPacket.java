@@ -45,6 +45,8 @@ public abstract class DataPacket extends BinaryStream implements Cloneable {
         } else {
             this.putUnsignedVarInt(packetId & 0xff);
         }
+*/
+        this.putUnsignedVarInt(this.getPacketId());
 
 */
         this.putUnsignedVarInt(this.getPacketId());

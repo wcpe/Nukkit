@@ -3,6 +3,7 @@ package cn.nukkit.item;
 import cn.nukkit.item.RuntimeItemMapping.LegacyEntry;
 import cn.nukkit.Server;
 import cn.nukkit.level.GlobalBlockPalette;
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.Data;
@@ -106,6 +107,16 @@ public class RuntimeItems {
 
     public static int getLegacyIdFromLegacyString(String identifier) {
         return legacyString2LegacyInt.getOrDefault(identifier, -1);
+    }
+    public static void registerCustomItem(String nameId, int legacyId, int damage, Class<? extends Item> itemClass) {
+        Preconditions.checkNotNull(nameId, "nameId");
+        Preconditions.checkNotNull(itemClass, "itemClass");
+        Preconditions.checkArgument(legacyId > 0 && legacyId < 65535, "Invalid legacyId: " + legacyId);
+        Preconditions.checkArgument(!nameId.startsWith("minecraft:"), "Invalid identifier: " + nameId);
+        Preconditions.checkArgument(nameId.indexOf(58) != -1, "Invalid namespace: " + nameId);
+        itemPalette.registerItem(nameId, legacyId, damage);
+        itemPalette.generatePalette();
+        Item.list[legacyId] = itemClass;
     }
 
     @Data
