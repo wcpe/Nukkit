@@ -12,7 +12,7 @@ public class ResourcePackStackPacket extends DataPacket {
     public ResourcePack[] behaviourPackStack = new ResourcePack[0];
     public ResourcePack[] resourcePackStack = new ResourcePack[0];
     public boolean isExperimental = false;
-    public String gameVersion = ProtocolInfo.MINECRAFT_VERSION_NETWORK;
+    public String gameVersion = "*";
 
     @Override
     public void decode() {

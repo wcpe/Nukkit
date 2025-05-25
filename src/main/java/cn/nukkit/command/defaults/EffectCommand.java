@@ -78,6 +78,10 @@ public class EffectCommand extends Command {
                 return true;
             }
         }
+        if (effect == null) {
+            sender.sendMessage(new TranslationContainer("commands.effect.notFound", args[1]));
+            return true;
+        }
         int duration = 300;
         int amplification = 0;
         if (args.length >= 3) {

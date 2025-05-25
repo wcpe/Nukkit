@@ -72,7 +72,7 @@ public class StartGamePacket extends DataPacket {
     public boolean isFromWorldTemplate = false;
     public boolean isWorldTemplateOptionLocked = false;
     public boolean isOnlySpawningV1Villagers = false;
-    public String vanillaVersion = ProtocolInfo.MINECRAFT_VERSION_NETWORK;
+    public String vanillaVersion = "*";
     public String levelId = ""; //base64 string, usually the same as world folder name in vanilla
     public String worldName;
     public String premiumWorldTemplateId = "";
@@ -81,7 +81,7 @@ public class StartGamePacket extends DataPacket {
     public boolean isInventoryServerAuthoritative;
     public long currentTick;
     public int enchantmentSeed;
-    public String multiplayerCorrelationId = "";
+    public String multiplayerCorrelationId = "00000000-0000-0000-0000-000000000000";
     public boolean isDisablingPersonas;
     public boolean isDisablingCustomSkins;
     public boolean clientSideGenerationEnabled;
@@ -174,7 +174,7 @@ public class StartGamePacket extends DataPacket {
         this.put(RuntimeItems.getMapping().getItemPalette());
         this.putString(this.multiplayerCorrelationId);
         this.putBoolean(this.isInventoryServerAuthoritative);
-        this.putString(""); // Server Engine
+        this.putString(ProtocolInfo.MINECRAFT_VERSION_NETWORK); // Server Engine
         try {
             this.put(NBTIO.writeNetwork(new CompoundTag(""))); // playerPropertyData
         } catch (IOException e) {
