@@ -14,11 +14,11 @@ public interface ProtocolInfo {
      * Actual Minecraft: PE protocol version
      */
     @SuppressWarnings("UnnecessaryBoxing")
-    int CURRENT_PROTOCOL = Integer.valueOf("630"); // DO NOT REMOVE BOXING
+    int CURRENT_PROTOCOL = Integer.valueOf("686"); // DO NOT REMOVE BOXING
 
-    List<Integer> SUPPORTED_PROTOCOLS = Ints.asList(CURRENT_PROTOCOL);
+    List<Integer> SUPPORTED_PROTOCOLS = Ints.asList(685, CURRENT_PROTOCOL);
 
-    String MINECRAFT_VERSION_NETWORK = "1.20.50";
+    String MINECRAFT_VERSION_NETWORK = "1.21.2";
     String MINECRAFT_VERSION = 'v' + MINECRAFT_VERSION_NETWORK;
 
     byte BATCH_PACKET = (byte) 0xff;
@@ -220,6 +220,26 @@ public interface ProtocolInfo {
     // MC packet IDs continue from 300 (0x12c)
     // Hack: 100 is added to the IDs below on encode
     // TODO: New pid() function (int) while trying not to break too many plugins
-    byte __INTERNAL__OPEN_SIGN_PACKET = (byte) 0xfd; // 253
+    byte __INTERNAL__CAMERA_INSTRUCTION_PACKET = (byte) 253;
+    byte __INTERNAL__COMPRESSED_BIOME_DEFINITIONS_LIST_PACKET = (byte) 252;
+    byte __INTERNAL__TRIM_DATA_PACKET = (byte) 251;
+    byte __INTERNAL__OPEN_SIGN_PACKET = (byte) 250; // 253
+    byte __INTERNAL__AGENT_ANIMATION_PACKET = (byte) 249;
+    byte __INTERNAL__REFRESH_ENTITLEMENTS_PACKET = (byte) 248;
+    byte __INTERNAL__TOGGLE_CRAFTER_SLOT_REQUEST_PACKET = (byte) 247;
+    byte __INTERNAL__SET_PLAYER_INVENTORY_OPTIONS_PACKET = (byte) 246;
+    byte __INTERNAL__SET_HUD_PACKET = (byte) 245;
+    byte __INTERNAL__AWARD_ACHIEVEMENT_PACKET = (byte) 244;
+    byte __INTERNAL__CLIENTBOUND_CLOSE_FORM_PACKET = (byte) 243;
+    int CAMERA_INSTRUCTION_PACKET = 300;
+    int COMPRESSED_BIOME_DEFINITION_LIST_PACKET = 301;
+    int TRIM_DATA_PACKET = 302;
     int OPEN_SIGN_PACKET = 303;
+    int AGENT_ANIMATION_PACKET = 304;
+    int REFRESH_ENTITLEMENTS_PACKET = 305;
+    int PLAYER_TOGGLE_CRAFTER_SLOT_REQUEST_PACKET = 306;
+    int SET_PLAYER_INVENTORY_OPTIONS_PACKET = 307;
+    int SET_HUD_PACKET = 308;
+    int AWARD_ACHIEVEMENT_PACKET = 309;
+    int CLIENTBOUND_CLOSE_FORM_PACKET = 310;
 }

@@ -54,11 +54,13 @@ public class GameRules {
         gameRules.gameRules.put(SHOW_BORDER_EFFECT, new Value<>(Type.BOOLEAN, true));
         gameRules.gameRules.put(SEND_COMMAND_FEEDBACK, new Value<>(Type.BOOLEAN, true));
         gameRules.gameRules.put(SHOW_COORDINATES, new Value<>(Type.BOOLEAN, false));
+        gameRules.gameRules.put(SHOW_DAYS_PLAYED, new Value<>(Type.BOOLEAN, false));
         gameRules.gameRules.put(SHOW_DEATH_MESSAGES, new Value<>(Type.BOOLEAN, true));
         gameRules.gameRules.put(SHOW_RECIPE_MESSAGES, new Value<>(Type.BOOLEAN, true));
         gameRules.gameRules.put(SHOW_TAGS, new Value<>(Type.BOOLEAN, true));
         gameRules.gameRules.put(SPAWN_RADIUS, new Value<>(Type.INTEGER, 10));
         gameRules.gameRules.put(TNT_EXPLODES, new Value<>(Type.BOOLEAN, true));
+        gameRules.gameRules.put(TNT_EXPLOSION_DROP_DECAY, new Value<>(Type.BOOLEAN, false));
 
         return gameRules;
     }

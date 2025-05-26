@@ -14,10 +14,6 @@ import cn.nukkit.utils.TextFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 /**
  * Created on 2015/12/9 by xtypr.
  * Package cn.nukkit.command.defaults in project Nukkit .

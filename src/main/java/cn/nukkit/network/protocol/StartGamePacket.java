@@ -81,13 +81,14 @@ public class StartGamePacket extends DataPacket {
     public boolean isInventoryServerAuthoritative;
     public long currentTick;
     public int enchantmentSeed;
-    public String multiplayerCorrelationId = "";
+    public String multiplayerCorrelationId = "00000000-0000-0000-0000-000000000000";
     public boolean isDisablingPersonas;
     public boolean isDisablingCustomSkins;
     public boolean clientSideGenerationEnabled;
     public byte chatRestrictionLevel;
     public boolean disablePlayerInteractions;
     public boolean emoteChatMuted;
+    public boolean hardcore;
 
     @Override
     public void decode() {
@@ -110,6 +111,7 @@ public class StartGamePacket extends DataPacket {
         this.putVarInt(this.dimension);
         this.putVarInt(this.generator);
         this.putVarInt(this.worldGamemode);
+        this.putBoolean(this.hardcore);
         this.putVarInt(this.difficulty);
         this.putBlockVector3(this.spawnX, this.spawnY, this.spawnZ);
         this.putBoolean(this.hasAchievementsDisabled);
@@ -155,6 +157,9 @@ public class StartGamePacket extends DataPacket {
         this.putBoolean(false); // Experimental Gameplay
         this.putByte(this.chatRestrictionLevel);
         this.putBoolean(this.disablePlayerInteractions);
+        this.putString(""); // ServerId
+        this.putString(""); // WorldId
+        this.putString(""); // ScenarioId
         /* Level settings end */
         this.putString(this.levelId);
         this.putString(this.worldName);

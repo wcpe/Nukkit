@@ -15,6 +15,7 @@ public class ResourcePacksInfoPacket extends DataPacket {
     public boolean mustAccept;
     public boolean scripting;
     public boolean forceServerPacks;
+    public boolean hasAddonPacks;
     public ResourcePack[] behaviourPackEntries = new ResourcePack[0];
     public ResourcePack[] resourcePackEntries = new ResourcePack[0];
     public List<CDNEntry> CDNEntries = new ObjectArrayList<>();
@@ -28,6 +29,7 @@ public class ResourcePacksInfoPacket extends DataPacket {
     public void encode() {
         this.reset();
         this.putBoolean(this.mustAccept);
+        this.putBoolean(this.hasAddonPacks);
         this.putBoolean(this.scripting);
         this.putBoolean(this.forceServerPacks);
         this.encodeBehaviourPacks(this.behaviourPackEntries);
@@ -48,7 +50,7 @@ public class ResourcePacksInfoPacket extends DataPacket {
             this.putLLong(entry.getPackSize());
             this.putString(entry.getEncryptionKey()); // encryption key
             this.putString(entry.getSubPackName());
-            this.putString(!entry.getEncryptionKey().equals("") ? entry.getPackId().toString() : ""); // content identity
+            this.putString(!entry.getEncryptionKey().isEmpty() ? entry.getPackId().toString() : ""); // content identity
             this.putBoolean(entry.usesScripting());
         }
     }
@@ -61,7 +63,7 @@ public class ResourcePacksInfoPacket extends DataPacket {
             this.putLLong(entry.getPackSize());
             this.putString(entry.getEncryptionKey()); // encryption key
             this.putString(entry.getSubPackName());
-            this.putString(!entry.getEncryptionKey().equals("") ? entry.getPackId().toString() : ""); // content identity
+            this.putString(!entry.getEncryptionKey().isEmpty() ? entry.getPackId().toString() : ""); // content identity
             this.putBoolean(entry.usesScripting());
             this.putBoolean(entry.isRaytracingCapable());
         }

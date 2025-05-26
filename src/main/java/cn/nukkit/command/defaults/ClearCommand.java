@@ -33,25 +33,21 @@ public class ClearCommand extends VanillaCommand {
             return false;
         }
 
-        if (args.length > 1 || (!(sender instanceof Player) && args.length < 1)) {
+        if (args.length != 1) {
             sender.sendMessage(new TranslationContainer("commands.generic.usage", this.usageMessage));
-            return false;
-        }
-
-        if (args.length == 0) {
-            Player player = (Player) sender;
-            player.getInventory().clearAll();
             return false;
         }
 
         List<Player> targets = new ArrayList<>();
         if (args[0].equals("@a")) {
             targets.addAll(Server.getInstance().getOnlinePlayers().values());
-        } else {
+        }
+        else {
             Player target = sender.getServer().getPlayer(args[0].replace("@s", sender.getName()));
             if (target != null) {
                 targets.add(target);
-            } else {
+            }
+            else {
                 sender.sendMessage(new TranslationContainer(TextFormat.RED + "%commands.generic.player.notFound"));
                 return false;
             }
