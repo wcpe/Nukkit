@@ -2254,7 +2254,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
      * Send all default attributes
      */
     public void sendAttributes() {
-        int healthMax = this.getMaxHealth();
+        long healthMax = this.getMaxHealth();
         UpdateAttributesPacket pk = new UpdateAttributesPacket();
         pk.entityId = this.getId();
         pk.entries = new Attribute[]{
@@ -5731,7 +5731,7 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
         // HACK: solve the client-side absorption bug
         if (this.spawned) {
             UpdateAttributesPacket pk = new UpdateAttributesPacket();
-            int max = this.getMaxHealth();
+            long max = this.getMaxHealth();
             pk.entries = new Attribute[]{Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(max).setValue(this.health > 0 ? (this.health < max ? this.health : max) : 0)};
             pk.entityId = this.id;
             this.dataPacket(pk);
@@ -5739,12 +5739,12 @@ public class Player extends EntityHuman implements CommandSender, InventoryHolde
     }
 
     @Override
-    public void setMaxHealth(int maxHealth) {
+    public void setMaxHealth(long maxHealth) {
         super.setMaxHealth(maxHealth);
 
         if (this.spawned) {
             UpdateAttributesPacket pk = new UpdateAttributesPacket();
-            int max = this.getMaxHealth();
+            long max = this.getMaxHealth();
             pk.entries = new Attribute[]{Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(max).setValue(this.health > 0 ? (this.health < max ? this.health : max) : 0)};
             pk.entityId = this.id;
             this.dataPacket(pk);

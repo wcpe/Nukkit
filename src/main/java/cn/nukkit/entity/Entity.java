@@ -391,7 +391,7 @@ public abstract class Entity extends Location implements Metadatable {
     protected boolean noFallDamage;
 
     protected float health = 20;
-    protected int maxHealth = 20;
+    private long maxHealth = 20;
 
     protected float absorption;
 
@@ -1455,7 +1455,7 @@ public abstract class Entity extends Location implements Metadatable {
      * Get maximum health including health from health boost effect
      * @return current max health
      */
-    public int getMaxHealth() {
+    public long getMaxHealth() {
         return maxHealth + (this.hasEffect(Effect.HEALTH_BOOST) ? (this.getEffect(Effect.HEALTH_BOOST).getAmplifier() + 1) << 2 : 0);
     }
 
@@ -1463,11 +1463,11 @@ public abstract class Entity extends Location implements Metadatable {
      * Get normal maximum health excluding health from effects
      * @return real max health
      */
-    public int getRealMaxHealth() {
+    public long getRealMaxHealth() {
         return maxHealth;
     }
 
-    public void setMaxHealth(int maxHealth) {
+    public void setMaxHealth(long maxHealth) {
         this.maxHealth = maxHealth;
     }
 
