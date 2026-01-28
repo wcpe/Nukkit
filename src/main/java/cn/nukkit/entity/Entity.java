@@ -373,7 +373,7 @@ public abstract class Entity extends Location implements Metadatable {
     protected int age = 0;
 
     protected float health = 20;
-    private int maxHealth = 20;
+    private long maxHealth = 20;
 
     protected float absorption = 0;
 
@@ -1281,11 +1281,11 @@ public abstract class Entity extends Location implements Metadatable {
         return lastDamageCause;
     }
 
-    public int getMaxHealth() {
+    public long getMaxHealth() {
         return maxHealth + (this.hasEffect(Effect.HEALTH_BOOST) ? 4 * (this.getEffect(Effect.HEALTH_BOOST).getAmplifier() + 1) : 0);
     }
 
-    public void setMaxHealth(int maxHealth) {
+    public void setMaxHealth(long maxHealth) {
         this.maxHealth = maxHealth;
     }
 
