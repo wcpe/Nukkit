@@ -85,7 +85,7 @@ public class EntityIronGolem extends EntityWalkingMob {
     private void sendHealth() {
         if (this.isAlive()) {
             UpdateAttributesPacket pk = new UpdateAttributesPacket();
-            int max = this.getMaxHealth();
+            long max = this.getMaxHealth();
             pk.entries = new Attribute[]{Attribute.getAttribute(Attribute.MAX_HEALTH).setMaxValue(max).setValue(this.health < max ? this.health : max)};
             pk.entityId = this.id;
             Server.broadcastPacket(this.getViewers().values(), pk);

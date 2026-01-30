@@ -21,6 +21,8 @@ import java.util.Map;
 public class RuntimeItems {
 
     private static final Map<String, Integer> legacyString2LegacyInt = new HashMap<>();
+    private static final Map<Integer, String> legacyInt2LegacyString = new HashMap<>();
+    private static final Map<String, MappingEntry> latestIdentifierMapping = new HashMap<>();
     private static RuntimeItemMapping itemPalette;
     private static boolean initialized;
 
@@ -39,6 +41,7 @@ public class RuntimeItems {
         JsonObject json = JsonParser.parseReader(new InputStreamReader(itemIdsStream)).getAsJsonObject();
         for (String identifier : json.keySet()) {
             legacyString2LegacyInt.put(identifier, json.get(identifier).getAsInt());
+            legacyInt2LegacyString.put(json.get(identifier).getAsInt(), identifier);
         }
 
         InputStream mappingStream = Server.class.getClassLoader().getResourceAsStream("item_mappings.json");
@@ -47,7 +50,7 @@ public class RuntimeItems {
         }
         JsonObject itemMapping = JsonParser.parseReader(new InputStreamReader(mappingStream)).getAsJsonObject();
 
-        Map<String, MappingEntry> mappingEntries = new HashMap<>();
+        Map<String, MappingEntry> mappingEntries = latestIdentifierMapping;
         for (String legacyName : itemMapping.keySet()) {
             JsonObject convertData = itemMapping.getAsJsonObject(legacyName);
             for (String damageStr : convertData.keySet()) {
@@ -61,7 +64,7 @@ public class RuntimeItems {
 
     public static Item parseCreativeItem(JsonObject json, boolean ignoreUnknown) {
         String identifier = json.get("id").getAsString();
-        LegacyEntry legacyEntry = itemPalette.fromIdentifier(identifier);
+        RuntimeItemMapping.LegacyEntry legacyEntry = itemPalette.fromIdentifier(identifier);
         if (legacyEntry == null) {
             if (!ignoreUnknown) {
                 throw new IllegalStateException("Can not find legacyEntry for " + identifier);
@@ -108,6 +111,17 @@ public class RuntimeItems {
     public static int getLegacyIdFromLegacyString(String identifier) {
         return legacyString2LegacyInt.getOrDefault(identifier, -1);
     }
+
+    public static String getLegacyStringFromNew(String identifier) {
+        MappingEntry entry = latestIdentifierMapping.get(identifier);
+        return entry == null ? identifier : entry.getLegacyName();
+    }
+
+    public static String getLegacyStringFromLegacyId(int legacyId) {
+        return legacyInt2LegacyString.getOrDefault(legacyId, "minecraft:info_update");
+    }
+
+
     public static void registerCustomItem(String nameId, int legacyId, int damage, Class<? extends Item> itemClass) {
         Preconditions.checkNotNull(nameId, "nameId");
         Preconditions.checkNotNull(itemClass, "itemClass");

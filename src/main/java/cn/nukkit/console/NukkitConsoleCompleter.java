@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public class NukkitConsoleCompleter implements Completer {
-    private final Server server;
 
     @Override
     public void complete(LineReader lineReader, ParsedLine parsedLine, List<Candidate> candidates) {

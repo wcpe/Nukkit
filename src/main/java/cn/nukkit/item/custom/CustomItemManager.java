@@ -82,7 +82,7 @@ public class CustomItemManager {
 
         Item.list[definition.getLegacyId()] = definition.getImplementation();
 
-        RuntimeItems.getMapping().registerItem(definition.getIdentifier(), definition.getLegacyId(), definition.getLegacyId(), 0);
+        RuntimeItems.getMapping().registerItem(definition.getIdentifier(), definition.getLegacyId(), definition.getLegacyId());
 
         if (definition.getCreativeCategory() != null && definition.getCreativeCategory() != ItemDefinition.CreativeCategory.NONE) {
             try {

@@ -1,8 +1,11 @@
 package cn.nukkit.item;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.item.RuntimeItems.MappingEntry;
+import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.utils.BinaryStream;
+import cn.nukkit.utils.Utils;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -15,6 +18,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,6 +118,50 @@ public class RuntimeItemMapping {
             throw new IllegalArgumentException("Unknown legacy2Runtime mapping: id=" + id + " meta=" + meta);
         }
         return runtimeEntry;
+    }
+
+    public Item parseCreativeItem(JsonObject json, boolean ignoreUnknown) {
+        String identifier = json.get("id").getAsString();
+        LegacyEntry legacyEntry = this.fromIdentifier(identifier);
+        if (legacyEntry == null) {
+            log.trace("Can not find legacyEntry for " + identifier);
+            if (!ignoreUnknown) {
+                throw new IllegalStateException("Can not find legacyEntry for " + identifier);
+            }
+            return null;
+        }
+
+        byte[] nbtBytes;
+        if (json.has("nbt_b64")) {
+            nbtBytes = Base64.getDecoder().decode(json.get("nbt_b64").getAsString());
+        } else if (json.has("nbt_hex")) {
+            nbtBytes = Utils.parseHexBinary(json.get("nbt_hex").getAsString());
+        } else {
+            nbtBytes = new byte[0];
+        }
+
+        int legacyId = legacyEntry.getLegacyId();
+        int damage = 0;
+        if (json.has("damage")) {
+            damage = json.get("damage").getAsInt();
+        } else if (legacyEntry.isHasDamage()) {
+            damage = legacyEntry.getDamage();
+        } else if (json.has("blockRuntimeId")) {
+            int runtimeId = json.get("blockRuntimeId").getAsInt();
+            int fullId = GlobalBlockPalette.getLegacyFullId(runtimeId);
+            if (fullId == -1) {
+                if (ignoreUnknown) {
+                    return null;
+                } else {
+                    throw new IllegalStateException("Can not find blockRuntimeId for " + identifier + " (" + runtimeId + ")");
+                }
+            }
+
+            damage = fullId & Block.DATA_MASK;
+        }
+
+        int count = json.has("count") ? json.get("count").getAsInt() : 1;
+        return Item.get(legacyId, damage, count, nbtBytes);
     }
 
     public LegacyEntry fromIdentifier(String identifier) {
