@@ -9,7 +9,7 @@ import java.util.List;
 
 public abstract class FormWindow {
 
-    static final Gson GSON = new Gson();
+    protected static final Gson GSON = new Gson();
 
     protected transient boolean closed = false;
     protected final transient List<FormResponseHandler> handlers = new ObjectArrayList<>();
