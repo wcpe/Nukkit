@@ -443,7 +443,8 @@ public abstract class Entity extends Location implements Metadatable {
     private volatile boolean init;
     private volatile boolean initEntity;
 
-    private volatile boolean saveToStorage = true;
+    // 实体不应该被持久化保存
+    private volatile boolean saveToStorage = false;
 
     private PersistentDataContainer persistentContainer;
 
