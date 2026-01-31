@@ -1,11 +1,14 @@
 package cn.nukkit.entity.custom;
 
 import cn.nukkit.entity.Entity;
+import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 
 @Getter
 public class EntityDefinition {
@@ -17,7 +20,8 @@ public class EntityDefinition {
     private final boolean spawnEgg;
 
     private final String alternateName;
-    private final Class<? extends Entity> implementation;
+    @Setter
+    private BiFunction<FullChunk, CompoundTag, ? extends Entity> entityBiFunction;
 
     private final boolean serverSideOnly;
     private final int runtimeId;
@@ -25,12 +29,13 @@ public class EntityDefinition {
     private CompoundTag networkTag;
 
     @Builder
-    public EntityDefinition(String identifier, String parentEntity, boolean spawnEgg, String alternateName, Class<? extends Entity> implementation, boolean serverSideOnly) {
-        if (!CustomEntity.class.isAssignableFrom(implementation)) {
-            throw new IllegalArgumentException("Implementation class must implement CustomEntity interface");
-        }
+    public EntityDefinition(String identifier, String parentEntity, boolean spawnEgg, String alternateName, boolean serverSideOnly, int runtimeId) {
+        // 类型校验转移到 Entity 类的 createEntity 方法下
+        //        if (!CustomEntity.class.isAssignableFrom(implementation)) {
+//            throw new IllegalArgumentException("Implementation class must implement CustomEntity interface");
+//        }
 
-        if (serverSideOnly && parentEntity == null) {
+        if (runtimeId == 0 && parentEntity == null) {
             throw new IllegalArgumentException("Server side entity must have parent entity set");
         }
 
@@ -38,18 +43,20 @@ public class EntityDefinition {
         this.parentEntity = parentEntity;
         this.spawnEgg = spawnEgg;
         this.alternateName = alternateName;
-        this.implementation = implementation;
         this.serverSideOnly = serverSideOnly;
+        this.runtimeId = runtimeId;
 
-        if (this.serverSideOnly) {
-            int runtimeId = EntityManager.get().getRuntimeId(this.parentEntity);
-            if (runtimeId == 0) {
-                throw new IllegalArgumentException("Unknown entity type " + this.parentEntity);
-            }
-            this.runtimeId = runtimeId;
-        } else {
-            this.runtimeId = ID_ALLOCATOR.getAndIncrement();
-        }
+        // SB 老外
+//        if (this.serverSideOnly) {
+        // 我宣布写出下面这行代码的是纯煞笔
+//            int runtimeId = EntityManager.get().getRuntimeId(this.parentEntity);
+//            if (runtimeId == 0) {
+//                throw new IllegalArgumentException("Unknown entity type " + this.parentEntity);
+//            }
+//            this.runtimeId = runtimeId;
+//        } else {
+//            this.runtimeId = ID_ALLOCATOR.getAndIncrement();
+//        }
     }
 
     private CompoundTag createNetworkTag() {

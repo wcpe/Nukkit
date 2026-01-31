@@ -195,7 +195,11 @@ public class EntityHuman extends EntityHumanType {
                 this.setSkin(newSkin);
             }
 
-            this.uuid = Utils.dataToUUID(String.valueOf(this.getId()).getBytes(StandardCharsets.UTF_8), this.skin
+            if (this.skin == null) {
+                this.skin = new Skin();
+            }
+
+            this.uuid = Utils.dataToUUID(String.valueOf(this.getId()).getBytes(StandardCharsets.UTF_8), this.getSkin()
                     .getSkinData().data, this.getNameTag().getBytes(StandardCharsets.UTF_8));
         }
 
@@ -289,7 +293,7 @@ public class EntityHuman extends EntityHumanType {
             this.hasSpawned.put(player.getLoaderId(), player);
 
             if (!this.skin.isValid()) {
-                throw new IllegalStateException(this.getClass().getSimpleName() + " must have a valid skin set");
+                throw new IllegalStateException(this.getName() + " " + this.getClass().getSimpleName() + " must have a valid skin set");
             }
 
             if (this instanceof Player) {

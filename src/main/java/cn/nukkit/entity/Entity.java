@@ -47,6 +47,7 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiFunction;
 
 import static cn.nukkit.network.protocol.SetEntityLinkPacket.*;
 
@@ -997,7 +998,7 @@ public abstract class Entity extends Location implements Metadatable {
             if (definition == null) {
                 return null;
             }
-            clazz = definition.getImplementation();
+            return createEntityLazy(definition.getEntityBiFunction(), chunk, nbt);
         }
         return createEntity0(clazz, chunk, nbt, args);
     }
@@ -1010,7 +1011,7 @@ public abstract class Entity extends Location implements Metadatable {
 
         EntityDefinition definition = EntityManager.get().getDefinition(type);
         if (definition != null) {
-            return createEntity0(definition.getImplementation(), chunk, nbt, args);
+            return createEntityLazy(definition.getEntityBiFunction(), chunk, nbt);
         }
         return null;
     }
@@ -1044,6 +1045,14 @@ public abstract class Entity extends Location implements Metadatable {
             }
         }
 
+        return entity;
+    }
+
+    private static Entity createEntityLazy(BiFunction<FullChunk, CompoundTag, ? extends Entity> biFunction, FullChunk chunk, CompoundTag nbt) {
+        Entity entity = biFunction.apply(chunk, nbt);
+        if (!CustomEntity.class.isAssignableFrom(entity.getClass())) {
+            throw new IllegalArgumentException("Implementation class must implement CustomEntity interface —— " + entity.getClass().getName());
+        }
         return entity;
     }
 
