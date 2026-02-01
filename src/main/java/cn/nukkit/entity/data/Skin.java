@@ -6,6 +6,8 @@ import cn.nukkit.utils.*;
 import com.google.common.base.Preconditions;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import com.nimbusds.jose.shaded.json.JSONValue;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.awt.*;
@@ -39,21 +41,42 @@ public class Skin {
     private String playFabId = "";
     private String skinResourcePatch = GEOMETRY_CUSTOM;
     private SerializedImage skinData;
+    @Getter
     private final List<SkinAnimation> animations = new ArrayList<>();
+    @Getter
     private final List<PersonaPiece> personaPieces = new ArrayList<>();
+    @Getter
     private final List<PersonaPieceTint> tintColors = new ArrayList<>();
     private SerializedImage capeData;
     private String geometryData;
     private String animationData;
+    @Setter
+    @Getter
     private boolean premium;
+    @Setter
+    @Getter
     private boolean persona;
+    @Setter
+    @Getter
     private boolean capeOnClassic;
+    @Getter
+    @Setter
     private boolean primaryUser = true;
     private String capeId;
+    @Setter
+    @Getter
     private String skinColor = "#0";
+    @Setter
+    @Getter
     private String armSize = "wide";
+    @Setter
+    @Getter
     private boolean trusted = true;
+    @Getter
+    @Setter
     private String geometryDataEngineVersion = "";
+    @Getter
+    @Setter
     private boolean overridingPlayerAppearance = true;
 
     public boolean isValid() {
@@ -223,82 +246,6 @@ public class Skin {
         }
     }
 
-    public List<SkinAnimation> getAnimations() {
-        return animations;
-    }
-
-    public List<PersonaPiece> getPersonaPieces() {
-        return personaPieces;
-    }
-
-    public List<PersonaPieceTint> getTintColors() {
-        return tintColors;
-    }
-
-    public boolean isPremium() {
-        return premium;
-    }
-
-    public void setPremium(boolean premium) {
-        this.premium = premium;
-    }
-
-    public boolean isPersona() {
-        return persona;
-    }
-
-    public void setPersona(boolean persona) {
-        this.persona = persona;
-    }
-
-    public boolean isCapeOnClassic() {
-        return capeOnClassic;
-    }
-
-    public void setCapeOnClassic(boolean capeOnClassic) {
-        this.capeOnClassic = capeOnClassic;
-    }
-
-    public void setPrimaryUser(boolean primaryUser) {
-        this.primaryUser = primaryUser;
-    }
-
-    public boolean isPrimaryUser() {
-        return primaryUser;
-    }
-
-    public void setGeometryDataEngineVersion(String geometryDataEngineVersion) {
-        this.geometryDataEngineVersion = geometryDataEngineVersion;
-    }
-
-    public String getGeometryDataEngineVersion() {
-        return geometryDataEngineVersion;
-    }
-
-    public boolean isTrusted() {
-        return trusted;
-    }
-
-    public void setTrusted(boolean trusted) {
-        this.trusted = trusted;
-    }
-
-    public String getSkinColor() {
-        return skinColor;
-    }
-
-    public void setSkinColor(String skinColor) {
-        this.skinColor = skinColor;
-    }
-
-    public String getArmSize() {
-        return armSize;
-    }
-
-    public void setArmSize(String armSize) {
-        this.armSize = armSize;
-    }
-
     public void setFullSkinId(String fullSkinId) {
         this.fullSkinId = fullSkinId;
         this.noPlayFab = false; // Allow another attempt to generate it using the new id
@@ -359,11 +306,4 @@ public class Skin {
         return "{\"geometry\" : {\"default\" : \"" + geometryName + "\"}}";
     }
 
-    public void setOverridingPlayerAppearance(boolean overridingPlayerAppearance) {
-        this.overridingPlayerAppearance = overridingPlayerAppearance;
-    }
-
-    public boolean isOverridingPlayerAppearance() {
-        return this.overridingPlayerAppearance;
-    }
 }
