@@ -1,6 +1,7 @@
 package cn.nukkit.entity;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.entity.EntityDamageBlockedEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
@@ -195,6 +196,10 @@ public class EntityHuman extends EntityHumanType {
                 this.setSkin(newSkin);
             }
 
+            if (this.skin == null) {
+                this.skin = new Skin();
+            }
+
             this.uuid = Utils.dataToUUID(String.valueOf(this.getId()).getBytes(StandardCharsets.UTF_8), this.getSkin()
                     .getSkinData().data, this.getNameTag().getBytes(StandardCharsets.UTF_8));
         }
@@ -286,11 +291,14 @@ public class EntityHuman extends EntityHumanType {
     @Override
     public void spawnTo(Player player) {
         if (this != player && !this.hasSpawned.containsKey(player.getLoaderId())) {
-            this.hasSpawned.put(player.getLoaderId(), player);
 
             if (!this.skin.isValid()) {
-                throw new IllegalStateException(this.getName() + " " + this.getClass().getSimpleName() + " must have a valid skin set");
+                Server.getInstance().getLogger().warning("Name: " + this.getName() + ",skinObject: " + this.skin);
+                Server.getInstance().getLogger().warning(this.getName() + " " + this.getClass().getSimpleName() + " must have a valid skin set");
+                return;
             }
+
+            this.hasSpawned.put(player.getLoaderId(), player);
 
             if (this instanceof Player) {
                 this.server.updatePlayerListData(this.uuid, this.getId(), ((Player) this).getDisplayName(), this.skin, ((Player) this).getLoginChainData().getXUID(), new Player[]{player});
