@@ -14,6 +14,7 @@ import lombok.val;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 public class SimpleCommandMap implements CommandMap {
     private static final Pattern PATTERN_ON_SPACE = Pattern.compile(" ", Pattern.LITERAL);
 
-    protected final Map<String, Command> knownCommands = new HashMap<>();
+    protected final Map<String, Command> knownCommands = new ConcurrentHashMap<>();
 
     private final Server server;
 

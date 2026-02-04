@@ -173,7 +173,9 @@ public class Level implements ChunkManager, Metadatable, GeneratorTaskFactory {
 
     public final Long2ObjectOpenHashMap<Entity> entities = new Long2ObjectOpenHashMap<>();
 
-    public final Long2ObjectOpenHashMap<Entity> updateEntities = new Long2ObjectOpenHashMap<>();
+    // scheduleUpdate() may be called off-thread by plugins; the plain HashMap wasn't thread-safe and could NPE while iterating.
+    // Use a synchronized map and snapshot keys during iteration to avoid concurrent modification crashes.
+    public final Long2ObjectMap<Entity> updateEntities = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
     private final ConcurrentLinkedQueue<BlockEntity> updateBlockEntities = new ConcurrentLinkedQueue<>();
 
@@ -855,7 +857,12 @@ public class Level implements ChunkManager, Metadatable, GeneratorTaskFactory {
 
 
         if (!this.updateEntities.isEmpty()) {
-            for (long id : new ArrayList<>(this.updateEntities.keySet())) {
+            // 拿快照再迭代，避免并发 put 触发 fastutil 的迭代器 NPE
+            long[] ids;
+            synchronized (this.updateEntities) {
+                ids = this.updateEntities.keySet().toLongArray();
+            }
+            for (long id : ids) {
                 Entity entity = this.updateEntities.get(id);
                 if (entity == null) {
                     this.updateEntities.remove(id);
