@@ -27,9 +27,3 @@ jobs:
           mvn -B clean install
       - name: Build
         run: mvn -B clean package
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: Nukkit
-          path: target/nukkit-1.0-SNAPSHOT.jar
